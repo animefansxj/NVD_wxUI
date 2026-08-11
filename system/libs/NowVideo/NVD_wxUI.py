@@ -115,6 +115,8 @@ class AboutDialog:
     Element_ButtonOK = None
     LOGO_MAX_WIDTH = 256
     LOGO_MAX_HEIGHT = 80
+    BOX_SIZER_MARGIN_STEPPING = 5
+    DETAIL_HEIGHT_OFFSET = -60
     
     def __init__(self,Parent:wx.Window,Title:str,LogoPath:str|None,LogoScale:float|None,ProductName:str,ProductSubtitle:str,ProductVersion:str,ProductCopyright:str,ProductDetail:str,Size:wx.Size):
         UsedHeight = 0
@@ -128,17 +130,17 @@ class AboutDialog:
         self.Container_DetailhBox = wx.BoxSizer(wx.HORIZONTAL)
         self.Container_DetailTextvBox = wx.BoxSizer(wx.VERTICAL)
         self.Container_ButtonhBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.Container_MainvBox.AddStretchSpacer(10)
+        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING * 2)
         self.Container_MainvBox.Add(self.Container_NamehBox,2,wx.ALIGN_CENTER)
-        self.Container_MainvBox.AddStretchSpacer(10)
+        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING * 2)
         self.Container_MainvBox.Add(self.Container_SubtitlehBox,1,wx.ALIGN_CENTER)
         self.Container_MainvBox.Add(self.Container_VersionhBox,1,wx.ALIGN_CENTER)
         self.Container_MainvBox.Add(self.Container_CopyrighthBox,1,wx.ALIGN_CENTER)
-        self.Container_MainvBox.AddStretchSpacer(5)
+        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING)
         self.Container_MainvBox.Add(self.Container_DetailhBox,4,wx.ALIGN_CENTER)
-        self.Container_MainvBox.AddStretchSpacer(5)
+        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING)
         self.Container_MainvBox.Add(self.Container_ButtonhBox,1,wx.ALIGN_CENTER)
-        self.Container_MainvBox.AddStretchSpacer(10)
+        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING * 2)
 
         self.Element_ProductName = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductName)
         self.Element_ProductSubtitle = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductSubtitle)
@@ -187,13 +189,12 @@ class AboutDialog:
             self.Element_ProductSubtitle.GetSize().GetHeight() + \
             self.Element_ProductVersion.GetSize().GetHeight() + \
             self.Element_ProductCopyright.GetSize().GetHeight() + \
-            self.Element_ButtonOK.GetSize().GetHeight() + \
-            120
+            self.Element_ButtonOK.GetSize().GetHeight()
 
         self.Container_DetailTextvBox.Add(self.Element_ProductDetail,1,wx.EXPAND|wx.ALL,1)
         self.Element_ProductDetailContainer.SetSizer(self.Container_DetailTextvBox)
-        self.Element_ProductDetailContainer.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 10))
-        self.Element_ProductDetail.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 12))
+        self.Element_ProductDetailContainer.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 50 + self.DETAIL_HEIGHT_OFFSET))
+        self.Element_ProductDetail.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 52 + self.DETAIL_HEIGHT_OFFSET))
 
         self.Container_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
         self.Container_SubtitlehBox.Add(self.Element_ProductSubtitle,1)
