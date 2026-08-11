@@ -9,7 +9,7 @@ def OnClickAbout(Parent:wx.Window):
 
     AboutDialog = ui.AboutDialog(
         Parent,"About this App...",
-        None,
+        "system/medias/images/AboutLogo.png",
         None,
         "NVDTEST",
         "A test program for build NVD_wxUI",

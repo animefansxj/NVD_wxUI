@@ -15,142 +15,153 @@
 import wx
 
 class AddSticker:
-    Bundle_MainPanel = None
-    Bundle_vBox = None
-    Bundle_MainText = None
-    Bundle_HitsText = None
+    Element_MainPanel = None
+    Element_vBox = None
+    Element_MainText = None
+    Element_HitsText = None
+    Text_MainText = None
+    Text_HitsText = None
     Font_Main = None
     Font_Hits = None
 
 #生成仪表盘中的单个含背景色Label
-    def __init__(self,ParentPanel:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,MainText:str,HitsText:str,FontName:str,MainFontSize:int,HitsFontSize:int,FontColor:wx.Colour):
+    def __init__(self,ParentPanel:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,MainText:str|None,HitsText:str|None,FontName:str,MainFontSize:int,HitsFontSize:int,FontColor:wx.Colour):
+        if(MainText):
+            self.Text_MainText = MainText
+        else:
+            self.Text_MainText = " "
+        if(HitsText):
+            self.Text_HitsText = HitsText
+        else:
+            self.Text_HitsText = " "
         
-        self.Bundle_MainPanel = wx.Panel(ParentPanel,wx.ID_ANY,Position,Size)
-        self.Bundle_MainPanel.SetBackgroundColour(wx.Colour(BGColor))
+        self.Element_MainPanel = wx.Panel(ParentPanel,wx.ID_ANY,Position,Size)
+        self.Element_MainPanel.SetBackgroundColour(wx.Colour(BGColor))
         
         self.Font_Main = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
         self.Font_Hits = wx.Font(HitsFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
 
-        self.Bundle_MainText = wx.StaticText(self.Bundle_MainPanel,label=MainText)
-        self.Bundle_MainText.SetFont(self.Font_Main)
-        self.Bundle_MainText.SetForegroundColour(FontColor)
-        self.Bundle_MainText.Center()
-        self.Bundle_HitsText = wx.StaticText(self.Bundle_MainPanel,label=HitsText)
-        self.Bundle_HitsText.SetFont(self.Font_Hits)
-        self.Bundle_HitsText.SetForegroundColour(FontColor)
-        self.Bundle_vBox = wx.BoxSizer(wx.VERTICAL)
-        self.Bundle_vBox.AddStretchSpacer(1)
-        self.Bundle_vBox.Add(self.Bundle_HitsText,0,wx.LEFT|wx.BOTTOM,4)
-        self.Bundle_MainPanel.SetSizer(self.Bundle_vBox)
-        self.Bundle_MainPanel.Layout()
-        self.Bundle_MainPanel.Update()
+        self.Element_MainText = wx.StaticText(self.Element_MainPanel,label=self.Text_MainText)
+        self.Element_MainText.SetFont(self.Font_Main)
+        self.Element_MainText.SetForegroundColour(FontColor)
+        self.Element_MainText.Center()
+        self.Element_HitsText = wx.StaticText(self.Element_MainPanel,label=self.Text_HitsText)
+        self.Element_HitsText.SetFont(self.Font_Hits)
+        self.Element_HitsText.SetForegroundColour(FontColor)
+        self.Element_vBox = wx.BoxSizer(wx.VERTICAL)
+        self.Element_vBox.AddStretchSpacer(1)
+        self.Element_vBox.Add(self.Element_HitsText,0,wx.LEFT|wx.BOTTOM,4)
+        self.Element_MainPanel.SetSizer(self.Element_vBox)
+        self.Element_MainPanel.Layout()
+        self.Element_MainPanel.Update()
 
     def SetTextColor(self,FontColor:wx.Colour) -> None:
-        self.Bundle_MainText.SetForegroundColour(FontColor)
-        self.Bundle_HintsText.SetForegroundColour(FontColor)
+        self.Element_MainText.SetForegroundColour(FontColor)
+        self.Element_HintsText.SetForegroundColour(FontColor)
 
     def SetBGColor(self,BGColor:wx.Colour) -> None:
-        self.Bundle_MainPanel.SetBackgroundColour(wx.Colour(BGColor))
+        self.Element_MainPanel.SetBackgroundColour(wx.Colour(BGColor))
 
     def SetMainText(self,Text:str) -> None:
-        self.Bundle_MainText.SetLabel(Text)
+        self.Element_MainText.SetLabel(Text)
 
     def GetMainText(self) -> str:
-        return self.Bundle_MainText.GetLabel()
+        return self.Element_MainText.GetLabel()
 
     def SetHitsText(self,Text:str|None) -> None:
         if(Text):
-            self.Bundle_HitsText.SetLabel(Text)
+            self.Element_HitsText.SetLabel(Text)
         else:
-            self.Bundle_HitsText.SetLabel(" ")
+            self.Element_HitsText.SetLabel(" ")
 
     def GetHitsText(self) -> str:
-        Text = self.Bundle_HitsText.GetLabel()
+        Text = self.Element_HitsText.GetLabel()
         if(Text == " "):
             return None
         else:
-            return self.Bundle_HitsText.GetLabel()
+            return self.Element_HitsText.GetLabel()
 
     def SetText(self,MainText:str,HitsText:str):
         self.SetMainText(MainText)
         self.SetHitsText(HitsText)
 
     def Move(self,Pos:wx.Point) -> None:
-        self.Bundle_MainPanel.SetPosition(Pos)
+        self.Element_MainPanel.SetPosition(Pos)
 
     def Scale(self,Size:wx.Size) -> None:
-        self.Bundle_MainPanel.SetSize(Size)
+        self.Element_MainPanel.SetSize(Size)
 
     def GetSize(self) -> wx.Size:
-        return self.Bundle_MainPanel.GetSize()
+        return self.Element_MainPanel.GetSize()
 
 
 class AboutDialog:
-    AboutDialog = None
-    MainPanel = None
-    MainvBox = None
-    NamehBox = None
-    SubtitlehBox = None
-    VersionhBox = None
-    CopyrighthBox = None
-    DetailhBox = None
-    DetailTextvBox = None
-    ButtonhBox = None
-    ProductName = None
-    ProductSubtitle = None
-    ProductVersion = None
-    ProductCopyright = None
-    ProductDetail = None
-    ButtonOK = None
+    Element_AboutDialog = None
+    Element_MainPanel = None
+    Container_MainvBox = None
+    Container_NamehBox = None
+    Container_SubtitlehBox = None
+    Container_VersionhBox = None
+    Container_CopyrighthBox = None
+    Container_DetailhBox = None
+    Container_DetailTextvBox = None
+    Container_ButtonhBox = None
+    Element_ProductName = None
+    Element_ProductSubtitle = None
+    Element_ProductVersion = None
+    Element_ProductCopyright = None
+    Element_ProductDetailContainer = None
+    Element_ProductDetail = None
+    Element_ButtonOK = None
     LOGO_MAX_WIDTH = 256
     LOGO_MAX_HEIGHT = 80
     
     def __init__(self,Parent:wx.Window,Title:str,LogoPath:str|None,LogoScale:float|None,ProductName:str,ProductSubtitle:str,ProductVersion:str,ProductCopyright:str,ProductDetail:str,Size:wx.Size):
         UsedHeight = 0
-        self.AboutDialog = wx.Dialog(Parent,wx.ID_ANY,Title,size=Size)
-        self.MainPanel = wx.Panel(self.AboutDialog,wx.ID_ANY)
-        self.MainvBox = wx.BoxSizer(wx.VERTICAL)
-        self.NamehBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.SubtitlehBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.VersionhBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.CopyrighthBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.DetailhBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.DetailTextvBox = wx.BoxSizer(wx.VERTICAL)
-        self.ButtonhBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.MainvBox.AddStretchSpacer(10)
-        self.MainvBox.Add(self.NamehBox,2,wx.ALIGN_CENTER)
-        self.MainvBox.AddStretchSpacer(10)
-        self.MainvBox.Add(self.SubtitlehBox,1,wx.ALIGN_CENTER)
-        self.MainvBox.Add(self.VersionhBox,1,wx.ALIGN_CENTER)
-        self.MainvBox.Add(self.CopyrighthBox,1,wx.ALIGN_CENTER)
-        self.MainvBox.AddStretchSpacer(5)
-        self.MainvBox.Add(self.DetailhBox,4,wx.ALIGN_CENTER)
-        self.MainvBox.AddStretchSpacer(5)
-        self.MainvBox.Add(self.ButtonhBox,1,wx.ALIGN_CENTER)
-        self.MainvBox.AddStretchSpacer(10)
+        self.Element_AboutDialog = wx.Dialog(Parent,wx.ID_ANY,Title,size=Size)
+        self.Element_MainPanel = wx.Panel(self.Element_AboutDialog,wx.ID_ANY)
+        self.Container_MainvBox = wx.BoxSizer(wx.VERTICAL)
+        self.Container_NamehBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Container_SubtitlehBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Container_VersionhBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Container_CopyrighthBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Container_DetailhBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Container_DetailTextvBox = wx.BoxSizer(wx.VERTICAL)
+        self.Container_ButtonhBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Container_MainvBox.AddStretchSpacer(10)
+        self.Container_MainvBox.Add(self.Container_NamehBox,2,wx.ALIGN_CENTER)
+        self.Container_MainvBox.AddStretchSpacer(10)
+        self.Container_MainvBox.Add(self.Container_SubtitlehBox,1,wx.ALIGN_CENTER)
+        self.Container_MainvBox.Add(self.Container_VersionhBox,1,wx.ALIGN_CENTER)
+        self.Container_MainvBox.Add(self.Container_CopyrighthBox,1,wx.ALIGN_CENTER)
+        self.Container_MainvBox.AddStretchSpacer(5)
+        self.Container_MainvBox.Add(self.Container_DetailhBox,4,wx.ALIGN_CENTER)
+        self.Container_MainvBox.AddStretchSpacer(5)
+        self.Container_MainvBox.Add(self.Container_ButtonhBox,1,wx.ALIGN_CENTER)
+        self.Container_MainvBox.AddStretchSpacer(10)
 
-        self.ProductName = wx.StaticText(self.MainPanel,wx.ID_ANY,ProductName)
-        self.ProductSubtitle = wx.StaticText(self.MainPanel,wx.ID_ANY,ProductSubtitle)
-        self.ProductVersion = wx.StaticText(self.MainPanel,wx.ID_ANY,ProductVersion)
-        self.ProductCopyright = wx.StaticText(self.MainPanel,wx.ID_ANY,ProductCopyright)
-        self.ProductDetailContainer = wx.Panel(self.MainPanel,wx.ID_ANY)
-        self.ProductDetail = wx.TextCtrl(self.ProductDetailContainer,wx.ID_ANY,ProductDetail,style=wx.TE_MULTILINE|wx.TE_READONLY|wx.BORDER_NONE)
-        #self.ProductDetailContainer = wx.Panel(self.MainPanel,wx.ID_ANY,size=(int(Size[0]-62),int(Size[0]/2)+2))
-        #self.ProductDetail = wx.TextCtrl(self.ProductDetailContainer,wx.ID_ANY,ProductDetail,pos=(1,1),size=(int(Size[0]-64),int(Size[0]/2)),style=wx.TE_MULTILINE|wx.TE_READONLY|wx.BORDER_NONE)
-        self.ButtonOK = wx.Button(self.MainPanel,wx.ID_ANY,"&OK")
+        self.Element_ProductName = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductName)
+        self.Element_ProductSubtitle = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductSubtitle)
+        self.Element_ProductVersion = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductVersion)
+        self.Element_ProductCopyright = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductCopyright)
+        self.Element_ProductDetailContainer = wx.Panel(self.Element_MainPanel,wx.ID_ANY)
+        self.Element_ProductDetail = wx.TextCtrl(self.Element_ProductDetailContainer,wx.ID_ANY,ProductDetail,style=wx.TE_MULTILINE|wx.TE_READONLY|wx.BORDER_NONE)
+        #self.ProductDetailContainer = wx.Panel(self.Element_MainPanel,wx.ID_ANY,size=(int(Size[0]-62),int(Size[0]/2)+2))
+        #self.ProductDetail = wx.TextCtrl(self.Element_ProductDetailContainer,wx.ID_ANY,ProductDetail,pos=(1,1),size=(int(Size[0]-64),int(Size[0]/2)),style=wx.TE_MULTILINE|wx.TE_READONLY|wx.BORDER_NONE)
+        self.Element_ButtonOK = wx.Button(self.Element_MainPanel,wx.ID_ANY,"&OK")
 
-        self.ProductName.SetForegroundColour("#880000")
-        self.ProductName.SetFont(wx.Font(24,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_BOLD,False,"SimHei",wx.FONTENCODING_DEFAULT))
-        self.ProductSubtitle.SetForegroundColour("#555555")
-        self.ProductSubtitle.SetFont(wx.Font(10,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_LIGHT,False,"SimHei",wx.FONTENCODING_DEFAULT))
-        self.ProductVersion.SetForegroundColour("#555555")
-        self.ProductVersion.SetFont(wx.Font(10,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_LIGHT,False,"SimHei",wx.FONTENCODING_DEFAULT))
-        self.ProductCopyright.SetForegroundColour("#555555")
-        self.ProductCopyright.SetFont(wx.Font(10,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_LIGHT,False,"SimHei",wx.FONTENCODING_DEFAULT))
-        self.ProductDetailContainer.SetBackgroundColour("#2FB6FF")
-        self.ProductDetail.SetBackgroundColour(self.MainPanel.GetBackgroundColour())
+        self.Element_ProductName.SetForegroundColour("#880000")
+        self.Element_ProductName.SetFont(wx.Font(24,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_BOLD,False,"SimHei",wx.FONTENCODING_DEFAULT))
+        self.Element_ProductSubtitle.SetForegroundColour("#555555")
+        self.Element_ProductSubtitle.SetFont(wx.Font(10,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_LIGHT,False,"SimHei",wx.FONTENCODING_DEFAULT))
+        self.Element_ProductVersion.SetForegroundColour("#555555")
+        self.Element_ProductVersion.SetFont(wx.Font(10,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_LIGHT,False,"SimHei",wx.FONTENCODING_DEFAULT))
+        self.Element_ProductCopyright.SetForegroundColour("#555555")
+        self.Element_ProductCopyright.SetFont(wx.Font(10,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_LIGHT,False,"SimHei",wx.FONTENCODING_DEFAULT))
+        self.Element_ProductDetailContainer.SetBackgroundColour("#2FB6FF")
+        self.Element_ProductDetail.SetBackgroundColour(self.Element_MainPanel.GetBackgroundColour())
 
-        UsedHeight = self.ProductName.GetBestSize().GetHeight()
+        UsedHeight = self.Element_ProductName.GetBestSize().GetHeight()
 
         if(LogoPath):
             try:
@@ -165,45 +176,45 @@ class AboutDialog:
                     else:
                         ScaleRatio = self.LOGO_MAX_HEIGHT / self.LogoImage.Height
                 self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*ScaleRatio),int(self.LogoImage.Height*ScaleRatio),wx.IMAGE_QUALITY_HIGH)
-                self.Logo = wx.StaticBitmap(self.MainPanel,wx.ID_ANY,self.LogoImage)
-                self.NamehBox.Add(self.Logo,3,wx.ALIGN_CENTER)
+                self.Logo = wx.StaticBitmap(self.Element_MainPanel,wx.ID_ANY,self.LogoImage)
+                self.Container_NamehBox.Add(self.Logo,3,wx.ALIGN_CENTER)
                 if(self.Logo.GetSize().GetHeight > UsedHeight):
                     UsedHeight = self.Logo.GetSize().GetHeight
             except:
                 print("Unable to load logo.")
 
         UsedHeight = UsedHeight + \
-            self.ProductSubtitle.GetSize().GetHeight() + \
-            self.ProductVersion.GetSize().GetHeight() + \
-            self.ProductCopyright.GetSize().GetHeight() + \
-            self.ButtonOK.GetSize().GetHeight() + \
+            self.Element_ProductSubtitle.GetSize().GetHeight() + \
+            self.Element_ProductVersion.GetSize().GetHeight() + \
+            self.Element_ProductCopyright.GetSize().GetHeight() + \
+            self.Element_ButtonOK.GetSize().GetHeight() + \
             120
 
-        self.DetailTextvBox.Add(self.ProductDetail,1,wx.EXPAND|wx.ALL,1)
-        self.ProductDetailContainer.SetSizer(self.DetailTextvBox)
-        self.ProductDetailContainer.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 10))
-        self.ProductDetail.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 12))
+        self.Container_DetailTextvBox.Add(self.Element_ProductDetail,1,wx.EXPAND|wx.ALL,1)
+        self.Element_ProductDetailContainer.SetSizer(self.Container_DetailTextvBox)
+        self.Element_ProductDetailContainer.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 10))
+        self.Element_ProductDetail.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 12))
 
-        self.NamehBox.Add(self.ProductName,2,wx.ALIGN_CENTER)
-        self.SubtitlehBox.Add(self.ProductSubtitle,1)
-        self.VersionhBox.Add(self.ProductVersion,1)
-        self.CopyrighthBox.Add(self.ProductCopyright,1)
-        self.DetailhBox.Add(self.ProductDetailContainer,1)
-        self.ButtonhBox.Add(self.ButtonOK,1)
+        self.Container_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
+        self.Container_SubtitlehBox.Add(self.Element_ProductSubtitle,1)
+        self.Container_VersionhBox.Add(self.Element_ProductVersion,1)
+        self.Container_CopyrighthBox.Add(self.Element_ProductCopyright,1)
+        self.Container_DetailhBox.Add(self.Element_ProductDetailContainer,1)
+        self.Container_ButtonhBox.Add(self.Element_ButtonOK,1)
             
-        self.ButtonOK.Bind(wx.EVT_BUTTON,self.OnClose)
+        self.Element_ButtonOK.Bind(wx.EVT_BUTTON,self.OnClose)
 
-        self.AboutDialog.Center()
-        self.MainPanel.SetSizer(self.MainvBox)
-        self.MainPanel.Layout()
-        self.MainPanel.Update()
+        self.Element_AboutDialog.Center()
+        self.Element_MainPanel.SetSizer(self.Container_MainvBox)
+        self.Element_MainPanel.Layout()
+        self.Element_MainPanel.Update()
 
     def Show(self) -> None:
-        self.AboutDialog.ShowModal()
+        self.Element_AboutDialog.ShowModal()
 
     def OnClose(self,Event) -> None:
         # OSX下直接Destory会卡死
         if(wx.Platform == '__WXMAC__'):
-            self.AboutDialog.EndModal(0)
-        self.AboutDialog.Destroy()
+            self.Element_AboutDialog.EndModal(0)
+        self.Element_AboutDialog.Destroy()
     
