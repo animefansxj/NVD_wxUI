@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260731B                  #
+#                Rev 20260811C                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -148,8 +148,8 @@ class AboutDialog:
         self.Element_ProductCopyright = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductCopyright)
         self.Element_ProductDetailContainer = wx.Panel(self.Element_MainPanel,wx.ID_ANY)
         self.Element_ProductDetail = wx.TextCtrl(self.Element_ProductDetailContainer,wx.ID_ANY,ProductDetail,style=wx.TE_MULTILINE|wx.TE_READONLY|wx.BORDER_NONE)
-        #self.ProductDetailContainer = wx.Panel(self.Element_MainPanel,wx.ID_ANY,size=(int(Size[0]-62),int(Size[0]/2)+2))
-        #self.ProductDetail = wx.TextCtrl(self.Element_ProductDetailContainer,wx.ID_ANY,ProductDetail,pos=(1,1),size=(int(Size[0]-64),int(Size[0]/2)),style=wx.TE_MULTILINE|wx.TE_READONLY|wx.BORDER_NONE)
+        #self.Element_ProductDetailContainer = wx.Panel(self.Element_MainPanel,wx.ID_ANY,size=(int(Size[0]-62),int(Size[0]/2)+2))
+        #self.Element_ProductDetail = wx.TextCtrl(self.Element_ProductDetailContainer,wx.ID_ANY,ProductDetail,pos=(1,1),size=(int(Size[0]-64),int(Size[0]/2)),style=wx.TE_MULTILINE|wx.TE_READONLY|wx.BORDER_NONE)
         self.Element_ButtonOK = wx.Button(self.Element_MainPanel,wx.ID_ANY,"&OK")
 
         self.Element_ProductName.SetForegroundColour("#880000")
