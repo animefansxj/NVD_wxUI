@@ -13,6 +13,12 @@
 
 
 import wx
+import wx.lib.inspection
+
+class Debug:
+    def wxDebug():
+        wx.lib.inspection.InspectionTool().Show()
+
 
 class AddSticker:
     Element_MainPanel = None
@@ -173,23 +179,25 @@ class AboutDialog:
                 ScaleRatio = 1
                 self.LogoImage = wx.Image()
                 self.LogoImage.LoadFile(LogoPath,wx.BITMAP_TYPE_PNG)
-                # 若调用时定义了预缩放比例，则先执行一次缩放
-                if(LogoScale):
-                    self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*LogoScale),int(self.LogoImage.Height*LogoScale),wx.IMAGE_QUALITY_HIGH)
-                # 判断Logo的高度或宽度是否超出了限制大小
-                if(((self.LogoImage.Width / self.LOGO_MAX_WIDTH) > 1) or ((self.LogoImage.Height / self.LOGO_MAX_HEIGHT) > 1)):
-                    # 判断宽度和高度超出限制的比例，若宽度超出更多则通过宽度计算缩放比例，若高度超过更多则通过高度计算错放比例
-                    if((self.LogoImage.GetSize().GetWidth() / self.LOGO_MAX_WIDTH) > (self.LogoImage.GetSize().GetHeight() / self.LOGO_MAX_HEIGHT)):
-                        ScaleRatio = self.LOGO_MAX_WIDTH / self.LogoImage.Width
-                    else:
-                        ScaleRatio = self.LOGO_MAX_HEIGHT / self.LogoImage.Height
-                self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*ScaleRatio),int(self.LogoImage.Height*ScaleRatio),wx.IMAGE_QUALITY_HIGH)
-                self.Logo = wx.StaticBitmap(self.Element_MainPanel,wx.ID_ANY,self.LogoImage)
-                self.Container_NamehBox.Add(self.Logo,3,wx.ALIGN_CENTER)
-                # 将Logo高度与产品名称控件的高度做比较，取最大值 (UsedHeight=LogoImage.Height>UsedHeight?LogoImage.Height:UsedHeight)
-                if(self.LogoImage.Height > UsedHeight):
-                    UsedHeight = self.LogoImage.Height
-            except (ValueError, TypeError) as e:
+                # 判断图像加载是否成功
+                if(self.LogoImage.IsOk()):
+                    # 若调用时定义了预缩放比例，则先执行一次缩放
+                    if(LogoScale):
+                        self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*LogoScale),int(self.LogoImage.Height*LogoScale),wx.IMAGE_QUALITY_HIGH)
+                    # 判断Logo的高度或宽度是否超出了限制大小
+                    if(((self.LogoImage.Width / self.LOGO_MAX_WIDTH) > 1) or ((self.LogoImage.Height / self.LOGO_MAX_HEIGHT) > 1)):
+                        # 判断宽度和高度超出限制的比例，若宽度超出更多则通过宽度计算缩放比例，若高度超过更多则通过高度计算错放比例
+                        if((self.LogoImage.GetSize().GetWidth() / self.LOGO_MAX_WIDTH) > (self.LogoImage.GetSize().GetHeight() / self.LOGO_MAX_HEIGHT)):
+                            ScaleRatio = self.LOGO_MAX_WIDTH / self.LogoImage.Width
+                        else:
+                            ScaleRatio = self.LOGO_MAX_HEIGHT / self.LogoImage.Height
+                    self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*ScaleRatio),int(self.LogoImage.Height*ScaleRatio),wx.IMAGE_QUALITY_HIGH)
+                    self.Logo = wx.StaticBitmap(self.Element_MainPanel,wx.ID_ANY,self.LogoImage)
+                    self.Container_NamehBox.Add(self.Logo,3,wx.ALIGN_CENTER)
+                    # 将Logo高度与产品名称控件的高度做比较，取最大值 (UsedHeight=LogoImage.Height>UsedHeight?LogoImage.Height:UsedHeight)
+                    if(self.LogoImage.Height > UsedHeight):
+                        UsedHeight = self.LogoImage.Height
+            except BaseException as e:
                 print("Error: [AboutDialog][LoadImage]: " + str(e))
 
         # 计算TextCtrl以外控件的高度总和，若直接从BoxSizer取会得到错误的高度

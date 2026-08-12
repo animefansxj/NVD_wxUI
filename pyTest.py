@@ -5,6 +5,9 @@ import DetailedInfo as D
 def OnClickExit():
     exit(0)
 
+def OnClickWxDebug():
+    ui.Debug.wxDebug()
+
 def OnClickAbout(Parent:wx.Window):
 
     AboutDialog = ui.AboutDialog(
@@ -31,10 +34,12 @@ def WinMain():
     MainMenu.Append(FileMenu,"&File")
     MainMenu.Append(HelpMenu,"&Help")
     FileMenu_Exit = FileMenu.Append(wx.ID_EXIT,"&Exit")
+    HelpMenu_wxDebug = HelpMenu.Append(9051,"wxDebug")
     HelpMenu_About = HelpMenu.Append(wx.ID_ABOUT,"&About")
     MainWindow.SetMenuBar(MainMenu)
     MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickExit(),FileMenu_Exit)
     MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickAbout(MainWindow),HelpMenu_About)
+    MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickWxDebug(),HelpMenu_wxDebug)
 
 
     # 设置主窗口位置和底色
