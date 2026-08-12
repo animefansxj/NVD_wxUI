@@ -49,8 +49,8 @@ def WinMain():
 
     MainWindow_MainPanel = wx.Panel(MainWindow)
 
-    ui.AddSticker(MainWindow_MainPanel,(410,16),(224,64),wx.Colour(224,128,128),"FF-FF-FF-FF-FF-FF","无线网卡MAC地址","SimHei",16,10,wx.Colour("#FFF"))
-    ui.AddSticker(MainWindow_MainPanel,(640,16),(128,64),wx.Colour(128,128,224),"PF0DLL3X","设备序列号","SimHei",16,10,wx.Colour("#FFF"))
+    ui.Sticker(MainWindow_MainPanel,(410,16),(224,64),wx.Colour(224,128,128),"FF-FF-FF-FF-FF-FF","无线网卡MAC地址","SimHei",16,10,wx.Colour("#FFF"))
+    ui.Sticker(MainWindow_MainPanel,(640,16),(128,64),wx.Colour(128,128,224),"PF0DLL3X","设备序列号","SimHei",16,10,wx.Colour("#FFF"))
 
     # 显示主窗口
     MainWindow.Show()

@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260811C                  #
+#                Rev 20260812A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -14,13 +14,80 @@
 
 import wx
 import wx.lib.inspection
+import uuid
+
+
+class uiElements:
+    CONTAINER = True
+    Collection = None
+
+    class wxObj:
+        UUID = None
+        Parent = None
+        Body = None
+        CONTAINER = False
+
+        def __init__(self,Element:wx.Window|None):
+            self.UUID = uuid.uuid4()
+            if(Element):
+                self.SetElement(Element)
+
+        def SetElement(self,Element:wx.Window):
+            self.Body = Element
+
+        def SetParent(self,Element:uiElements.wxObjs):
+            self.Parent = Element
+
+
+    # 用于承载元素的聚合，如一个Line或者Bundle中的所有元素
+    class wxObjs:
+        UUID = None
+        Parent = None
+        Children = []
+        CONTAINER = True
+
+        def __init__(self):
+            self.UUID = uuid.uuid4()
+
+        def AppendElement(self,Element:wx.Window|uiElements.wxObjs|uiElements.wxObj):
+            if(type(Element) == wx.Window):
+                Temp = uiElements.wxObj(Element)
+            else:
+                Temp = Element
+            Temp.SetParent(self)
+            self.Children.append(Temp)
+            return Temp.UUID
+        
+        def SetParent(self,Element:uiElements.wxObjs):
+            self.Parent = Element
+
+    def __init__(self):
+        self.Collection = self.wxObjs()
+
+    # 遍历子对象
+    def Fetch(self):
+        print("Wait for write")
+
+    # 通过UUID查找对象
+    def FindObjByUUID():
+        print("Wait for write")
+
+    # 通过类型查找对象
+    def FindObjByType() -> list:
+        print("Wait for write")
+
+    def FindLabelByText() -> list:
+        print("Wait for write")
+
+
+
 
 class Debug:
     def wxDebug():
         wx.lib.inspection.InspectionTool().Show()
 
 
-class AddSticker:
+class Sticker:
     Element_MainPanel = None
     Element_vBox = None
     Element_MainText = None
@@ -236,4 +303,17 @@ class AboutDialog:
         if(wx.Platform == '__WXMAC__'):
             self.Element_AboutDialog.EndModal(0)
         self.Element_AboutDialog.Destroy()
+
+
+# 一个带标题栏的垂直滚动列表控件，每列一个控件
+class ListView:
     
+    Lines = []
+
+    def __init__(self):
+        # 先占位，等待后续编写 TBW
+        print("It's Run")
+
+    def AddLine(self,Elements:uiElements):
+        # 先占位，等待后续编写 TBW
+        print("It's Run")
