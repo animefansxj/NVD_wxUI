@@ -116,6 +116,7 @@ class AboutDialog:
     LOGO_MAX_WIDTH = 256
     LOGO_MAX_HEIGHT = 80
     BOX_SIZER_MARGIN_STEPPING = 5
+    # 若最终显示的TextCtrl高度过大或过小，调整此值
     DETAIL_HEIGHT_OFFSET = -60
     
     def __init__(self,Parent:wx.Window,Title:str,LogoPath:str|None,LogoScale:float|None,ProductName:str,ProductSubtitle:str,ProductVersion:str,ProductCopyright:str,ProductDetail:str,Size:wx.Size):
@@ -163,16 +164,21 @@ class AboutDialog:
         self.Element_ProductDetailContainer.SetBackgroundColour("#2FB6FF")
         self.Element_ProductDetail.SetBackgroundColour(self.Element_MainPanel.GetBackgroundColour())
 
+        # 先取得产品名称控件的最终高度
         UsedHeight = self.Element_ProductName.GetBestSize().GetHeight()
 
+        # 如果调用时指定了要显示Logo
         if(LogoPath):
             try:
                 ScaleRatio = 1
                 self.LogoImage = wx.Image()
                 self.LogoImage.LoadFile(LogoPath,wx.BITMAP_TYPE_PNG)
+                # 若调用时定义了预缩放比例，则先执行一次缩放
                 if(LogoScale):
                     self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*LogoScale),int(self.LogoImage.Height*LogoScale),wx.IMAGE_QUALITY_HIGH)
-                if(((self.LogoImage.Width / self.LOGO_MAX_WIDTH) >1) or ((self.LogoImage.Height / self.LOGO_MAX_HEIGHT) >1)):
+                # 判断Logo的高度或宽度是否超出了限制大小
+                if(((self.LogoImage.Width / self.LOGO_MAX_WIDTH) > 1) or ((self.LogoImage.Height / self.LOGO_MAX_HEIGHT) > 1)):
+                    # 判断宽度和高度超出限制的比例，若宽度超出更多则通过宽度计算缩放比例，若高度超过更多则通过高度计算错放比例
                     if((self.LogoImage.GetSize().GetWidth() / self.LOGO_MAX_WIDTH) > (self.LogoImage.GetSize().GetHeight() / self.LOGO_MAX_HEIGHT)):
                         ScaleRatio = self.LOGO_MAX_WIDTH / self.LogoImage.Width
                     else:
@@ -180,18 +186,22 @@ class AboutDialog:
                 self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*ScaleRatio),int(self.LogoImage.Height*ScaleRatio),wx.IMAGE_QUALITY_HIGH)
                 self.Logo = wx.StaticBitmap(self.Element_MainPanel,wx.ID_ANY,self.LogoImage)
                 self.Container_NamehBox.Add(self.Logo,3,wx.ALIGN_CENTER)
-                if(self.Logo.GetSize().GetHeight > UsedHeight):
-                    UsedHeight = self.Logo.GetSize().GetHeight
-            except:
-                print("Unable to load logo.")
+                # 将Logo高度与产品名称控件的高度做比较，取最大值 (UsedHeight=LogoImage.Height>UsedHeight?LogoImage.Height:UsedHeight)
+                if(self.LogoImage.Height > UsedHeight):
+                    UsedHeight = self.LogoImage.Height
+            except (ValueError, TypeError) as e:
+                print("Error: [AboutDialog][LoadImage]: " + str(e))
 
+        # 计算TextCtrl以外控件的高度总和，若直接从BoxSizer取会得到错误的高度
         UsedHeight = UsedHeight + \
             self.Element_ProductSubtitle.GetSize().GetHeight() + \
             self.Element_ProductVersion.GetSize().GetHeight() + \
             self.Element_ProductCopyright.GetSize().GetHeight() + \
             self.Element_ButtonOK.GetSize().GetHeight()
 
+        # 使用带底色的Panel作为TextCtrl的底色，保留四边1个像素来绘制TextCtrl的边框
         self.Container_DetailTextvBox.Add(self.Element_ProductDetail,1,wx.EXPAND|wx.ALL,1)
+        # 如果不使用BoxSizer来布局TextCtrl，会导致Panel尺寸改变后TextCtrl无法增加尺寸
         self.Element_ProductDetailContainer.SetSizer(self.Container_DetailTextvBox)
         self.Element_ProductDetailContainer.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 50 + self.DETAIL_HEIGHT_OFFSET))
         self.Element_ProductDetail.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 52 + self.DETAIL_HEIGHT_OFFSET))
