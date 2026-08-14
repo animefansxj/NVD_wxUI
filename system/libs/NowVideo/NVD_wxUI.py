@@ -97,14 +97,14 @@ class Sticker:
     Font_Data = None
     Font_Subject = None
 
-#生成仪表盘中的单个含背景色Label
-    def __init__(self,ParentPanel:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,MainText:str|None,HitsText:str|None,FontName:str,MainFontSize:int,HitsFontSize:int,FontColor:wx.Colour):
-        if(MainText):
-            self.Text_Data = MainText
+#生成仪表盘中的单个含背景色的贴条
+    def __init__(self,ParentPanel:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,Data:str|None,Subject:str|None,FontName:str,MainFontSize:int,HitsFontSize:int,FontColor:wx.Colour):
+        if(Data):
+            self.Text_Data = Data
         else:
             self.Text_Data = " "
-        if(HitsText):
-            self.Text_Subject = HitsText
+        if(Subject):
+            self.Text_Subject = Subject
         else:
             self.Text_Subject = " "
         
@@ -135,28 +135,28 @@ class Sticker:
     def SetBGColor(self,BGColor:wx.Colour) -> None:
         self.Element_MainPanel.SetBackgroundColour(wx.Colour(BGColor))
 
-    def SetMainText(self,Text:str) -> None:
+    def SetData(self,Text:str) -> None:
         self.Element_Data.SetLabel(Text)
 
-    def GetMainText(self) -> str:
+    def GetData(self) -> str:
         return self.Element_Data.GetLabel()
 
-    def SetHitsText(self,Text:str|None) -> None:
+    def SetSubject(self,Text:str|None) -> None:
         if(Text):
             self.Element_Subject.SetLabel(Text)
         else:
             self.Element_Subject.SetLabel(" ")
 
-    def GetHitsText(self) -> str:
+    def GetSubject(self) -> str:
         Text = self.Element_Subject.GetLabel()
         if(Text == " "):
             return None
         else:
             return self.Element_Subject.GetLabel()
 
-    def SetText(self,MainText:str,HitsText:str):
-        self.SetMainText(MainText)
-        self.SetHitsText(HitsText)
+    def SetText(self,Data:str,Subject:str):
+        self.SetData(Data)
+        self.SetSubject(Subject)
 
     def Move(self,Pos:wx.Point) -> None:
         self.Element_MainPanel.SetPosition(Pos)
