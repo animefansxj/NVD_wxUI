@@ -90,69 +90,69 @@ class Debug:
 class Sticker:
     Element_MainPanel = None
     Element_vBox = None
-    Element_MainText = None
-    Element_HitsText = None
-    Text_MainText = None
-    Text_HitsText = None
-    Font_Main = None
-    Font_Hits = None
+    Element_Data = None
+    Element_Subject = None
+    Text_Data = None
+    Text_Subject = None
+    Font_Data = None
+    Font_Subject = None
 
 #生成仪表盘中的单个含背景色Label
     def __init__(self,ParentPanel:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,MainText:str|None,HitsText:str|None,FontName:str,MainFontSize:int,HitsFontSize:int,FontColor:wx.Colour):
         if(MainText):
-            self.Text_MainText = MainText
+            self.Text_Data = MainText
         else:
-            self.Text_MainText = " "
+            self.Text_Data = " "
         if(HitsText):
-            self.Text_HitsText = HitsText
+            self.Text_Subject = HitsText
         else:
-            self.Text_HitsText = " "
+            self.Text_Subject = " "
         
         self.Element_MainPanel = wx.Panel(ParentPanel,wx.ID_ANY,Position,Size)
         self.Element_MainPanel.SetBackgroundColour(wx.Colour(BGColor))
         
-        self.Font_Main = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
-        self.Font_Hits = wx.Font(HitsFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
+        self.Font_Data = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
+        self.Font_Subject = wx.Font(HitsFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
 
-        self.Element_MainText = wx.StaticText(self.Element_MainPanel,label=self.Text_MainText)
-        self.Element_MainText.SetFont(self.Font_Main)
-        self.Element_MainText.SetForegroundColour(FontColor)
-        self.Element_MainText.Center()
-        self.Element_HitsText = wx.StaticText(self.Element_MainPanel,label=self.Text_HitsText)
-        self.Element_HitsText.SetFont(self.Font_Hits)
-        self.Element_HitsText.SetForegroundColour(FontColor)
+        self.Element_Data = wx.StaticText(self.Element_MainPanel,label=self.Text_Data)
+        self.Element_Data.SetFont(self.Font_Data)
+        self.Element_Data.SetForegroundColour(FontColor)
+        self.Element_Data.Center()
+        self.Element_Subject = wx.StaticText(self.Element_MainPanel,label=self.Text_Subject)
+        self.Element_Subject.SetFont(self.Font_Subject)
+        self.Element_Subject.SetForegroundColour(FontColor)
         self.Element_vBox = wx.BoxSizer(wx.VERTICAL)
         self.Element_vBox.AddStretchSpacer(1)
-        self.Element_vBox.Add(self.Element_HitsText,0,wx.LEFT|wx.BOTTOM,4)
+        self.Element_vBox.Add(self.Element_Subject,0,wx.LEFT|wx.BOTTOM,4)
         self.Element_MainPanel.SetSizer(self.Element_vBox)
         self.Element_MainPanel.Layout()
         self.Element_MainPanel.Update()
 
     def SetTextColor(self,FontColor:wx.Colour) -> None:
-        self.Element_MainText.SetForegroundColour(FontColor)
+        self.Element_Data.SetForegroundColour(FontColor)
         self.Element_HintsText.SetForegroundColour(FontColor)
 
     def SetBGColor(self,BGColor:wx.Colour) -> None:
         self.Element_MainPanel.SetBackgroundColour(wx.Colour(BGColor))
 
     def SetMainText(self,Text:str) -> None:
-        self.Element_MainText.SetLabel(Text)
+        self.Element_Data.SetLabel(Text)
 
     def GetMainText(self) -> str:
-        return self.Element_MainText.GetLabel()
+        return self.Element_Data.GetLabel()
 
     def SetHitsText(self,Text:str|None) -> None:
         if(Text):
-            self.Element_HitsText.SetLabel(Text)
+            self.Element_Subject.SetLabel(Text)
         else:
-            self.Element_HitsText.SetLabel(" ")
+            self.Element_Subject.SetLabel(" ")
 
     def GetHitsText(self) -> str:
-        Text = self.Element_HitsText.GetLabel()
+        Text = self.Element_Subject.GetLabel()
         if(Text == " "):
             return None
         else:
-            return self.Element_HitsText.GetLabel()
+            return self.Element_Subject.GetLabel()
 
     def SetText(self,MainText:str,HitsText:str):
         self.SetMainText(MainText)
