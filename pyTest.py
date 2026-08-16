@@ -24,7 +24,7 @@ def OnClickAbout(Parent:wx.Window):
 
 def WinMain():
     App = wx.App()
-    MainWindow = wx.Frame(None,wx.ID_ANY,"Test wxPython App (ASTMPD)",size=(800,600),style=wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER)
+    MainWindow = wx.Frame(None,wx.ID_ANY,"Test wxPython App",size=(800,600),style=wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER)
     MainWindow.SetMinSize((800,600))
     MainWindow.SetMaxSize((1200,600))
 
