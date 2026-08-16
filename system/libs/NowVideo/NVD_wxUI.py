@@ -27,7 +27,7 @@ class uiElements:
         Body = None
         CONTAINER = False
 
-        def __init__(self,Element:wx.Window|None):
+        def __init__(self,Element:wx.Window|None=None):
             self.UUID = uuid.uuid4()
             if(Element):
                 self.SetElement(Element)
@@ -88,7 +88,7 @@ class Debug:
 
 
 class Sticker:
-    Element_MainPanel = None
+    Body = None
     Element_vBox = None
     Element_Data = None
     Element_Subject = None
@@ -98,7 +98,7 @@ class Sticker:
     Font_Subject = None
 
 #生成仪表盘中的单个含背景色的贴条
-    def __init__(self,ParentPanel:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,Data:str|None,Subject:str|None,FontName:str,MainFontSize:int,HitsFontSize:int,FontColor:wx.Colour):
+    def __init__(self,ParentPanel:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,FontColor:wx.Colour,Data:str|None=None,Subject:str|None=None,FontName:str="Tahoma",MainFontSize:int=16,HitsFontSize:int=10):
         if(Data):
             self.Text_Data = Data
         else:
@@ -108,32 +108,32 @@ class Sticker:
         else:
             self.Text_Subject = " "
         
-        self.Element_MainPanel = wx.Panel(ParentPanel,wx.ID_ANY,Position,Size)
-        self.Element_MainPanel.SetBackgroundColour(wx.Colour(BGColor))
+        self.Body = wx.Panel(ParentPanel,wx.ID_ANY,Position,Size)
+        self.Body.SetBackgroundColour(wx.Colour(BGColor))
         
         self.Font_Data = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
         self.Font_Subject = wx.Font(HitsFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
 
-        self.Element_Data = wx.StaticText(self.Element_MainPanel,label=self.Text_Data)
+        self.Element_Data = wx.StaticText(self.Body,label=self.Text_Data)
         self.Element_Data.SetFont(self.Font_Data)
         self.Element_Data.SetForegroundColour(FontColor)
         self.Element_Data.Center()
-        self.Element_Subject = wx.StaticText(self.Element_MainPanel,label=self.Text_Subject)
+        self.Element_Subject = wx.StaticText(self.Body,label=self.Text_Subject)
         self.Element_Subject.SetFont(self.Font_Subject)
         self.Element_Subject.SetForegroundColour(FontColor)
         self.Element_vBox = wx.BoxSizer(wx.VERTICAL)
         self.Element_vBox.AddStretchSpacer(1)
         self.Element_vBox.Add(self.Element_Subject,0,wx.LEFT|wx.BOTTOM,4)
-        self.Element_MainPanel.SetSizer(self.Element_vBox)
-        self.Element_MainPanel.Layout()
-        self.Element_MainPanel.Update()
+        self.Body.SetSizer(self.Element_vBox)
+        self.Body.Layout()
+        self.Body.Update()
 
     def SetTextColor(self,FontColor:wx.Colour) -> None:
         self.Element_Data.SetForegroundColour(FontColor)
         self.Element_HintsText.SetForegroundColour(FontColor)
 
     def SetBGColor(self,BGColor:wx.Colour) -> None:
-        self.Element_MainPanel.SetBackgroundColour(wx.Colour(BGColor))
+        self.Body.SetBackgroundColour(wx.Colour(BGColor))
 
     def SetData(self,Text:str) -> None:
         self.Element_Data.SetLabel(Text)
@@ -159,13 +159,13 @@ class Sticker:
         self.SetSubject(Subject)
 
     def Move(self,Pos:wx.Point) -> None:
-        self.Element_MainPanel.SetPosition(Pos)
+        self.Body.SetPosition(Pos)
 
     def Scale(self,Size:wx.Size) -> None:
-        self.Element_MainPanel.SetSize(Size)
+        self.Body.SetSize(Size)
 
     def GetSize(self) -> wx.Size:
-        return self.Element_MainPanel.GetSize()
+        return self.Body.GetSize()
 
 
 class AboutDialog:
