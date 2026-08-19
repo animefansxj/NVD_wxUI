@@ -1,6 +1,14 @@
 import wx
+import wx.dataview
+import sys
 import system.libs.NowVideo.NVD_wxUI as ui
 import DetailedInfo as D
+
+try:
+    PATH_PREFIX = SYS._MEPASS + '/'
+    print("[!] Boot from: " + PATH_PREFIX)
+except:
+    PATH_PREFIX = None
 
 BASE_WINDOW_SIZE = (900,600)
 LEFT_PANEL_WIDTH = 520
@@ -29,6 +37,16 @@ PANEL = {
     }
 }
 COLOR = {
+    'WINDOW': {
+        'SELF': {
+            'BG': "#FFFFFF",
+            'FG': "#000000"
+        },
+        'TEXT': {
+            'BG': "#FFFFFF",
+            'FG': "#000000"
+        }
+    },
     'STATUS_BAR': {
         'READY': {
             'BG': "#000000",
@@ -108,7 +126,7 @@ def WinMain():
 
     # 设置主窗口位置和底色
     MainWindow.Center()
-    MainWindow.SetBackgroundColour(wx.Colour("#FFF"))
+    MainWindow.SetBackgroundColour(wx.Colour(COLOR['WINDOW']['SELF']['BG']))
     MainWindow.Update()
 
     MainWindow_MainPanel = wx.Panel(MainWindow)
@@ -135,9 +153,16 @@ def WinMain():
     MainWindow_StatusPanel.SetForegroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['FG']))
     MainWindow_StatusPanel.SetBackgroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['BG']))
 
-    Text1 = wx.StaticText(MainWindow_LeftPanel,wx.ID_ANY,"Left wxObj Test.")
+    TableView = wx.dataview.DataViewListCtrl(MainWindow_LeftPanel,size=PANEL['LEFT']['SIZE'],style=wx.dataview.DV_ROW_LINES)
+    TableView.AppendColumn(wx.dataview.DataViewColumn("UUID",wx.dataview.DataViewTextRenderer(),0))
+    TableView.AppendColumn(wx.dataview.DataViewColumn("Enabled",wx.dataview.DataViewToggleRenderer(mode=wx.dataview.DATAVIEW_CELL_ACTIVATABLE),1,width=60))
+    TableView.AppendColumn(wx.dataview.DataViewColumn("Name",wx.dataview.DataViewTextRenderer(),2,width=160))
+    TableView.AppendColumn(wx.dataview.DataViewColumn("Progress",wx.dataview.DataViewProgressRenderer(),3,width=80))
+    TableView.AppendColumn(wx.dataview.DataViewColumn("Status",wx.dataview.DataViewTextRenderer(),4))
+    TableView.GetColumn(0).SetHidden(True)
+    TableView.AppendItem(["",True,"Name1",60,"Status1"])
     MainWindow_LeftvBox.AddSpacer(10)
-    MainWindow_LeftvBox.Add(Text1,1)
+    MainWindow_LeftvBox.Add(TableView,1,wx.EXPAND|wx.ALL,15)
     MainWindow_LeftvBox.AddStretchSpacer()
     MainWindow_LeftvBox.AddSpacer(10)
 

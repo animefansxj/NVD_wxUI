@@ -13,6 +13,7 @@
 
 
 import wx
+import wx.dataview
 import wx.lib.inspection
 import uuid
 
