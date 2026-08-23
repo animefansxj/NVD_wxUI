@@ -176,15 +176,15 @@ def WinMain():
     '''
     TableView = ui.ListView(MainWindow_LeftPanel,Size=PANEL['LEFT']['SIZE'])
     TableView.SetCols("Enabled:toggle:60|Name:text:160|Progress:progress:80|Status:text")
-    TableView.AppendRow([True,"Name1",60,"60"],"Row1")
+    TableView.AppendRow([True,"Name 1",60,"Status 1"],"Row1")
     LeftPanel_LeftvBox.AddSpacer(10)
     LeftPanel_LeftvBox.Add(TableView.Body,1,wx.EXPAND|wx.ALL,15)
     LeftPanel_LeftvBox.AddStretchSpacer()
     LeftPanel_LeftvBox.AddSpacer(10)
 
-    STK1_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(330,60),wx.Colour(64,128,80),wx.Colour(255,255,255),"数据1","品目1","SimHei",16,10)
-    STK2_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(200,60),wx.Colour(224,128,128),wx.Colour("#FFF"),"FF-FF-FF-FF-FF-FF","无线网卡MAC地址","SimHei",16,10)
-    STK2_2 = ui.Sticker(MainWindow_RightPanel,(0,0),(120,60),wx.Colour(128,128,224),wx.Colour("#FFF"),"PF0DLL3X","设备序列号","SimHei",16,10)
+    STK1_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(330,60),wx.Colour(64,128,80),wx.Colour(255,255,255),"Data 1","Subject 1","SimHei",16,10)
+    STK2_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(200,60),wx.Colour(224,128,128),wx.Colour("#FFF"),"Data 2","Subject 2","SimHei",16,10)
+    STK2_2 = ui.Sticker(MainWindow_RightPanel,(0,0),(120,60),wx.Colour(128,128,224),wx.Colour("#FFF"),"Data 3","Subject 3","SimHei",16,10)
 
     Stickers = []
     Stickers.append(hBoxLine(STK1_1.Body,Border=5))
