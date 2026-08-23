@@ -234,16 +234,16 @@ class ListView:
         return RowIndexList
 
     def SetValueByIndex(self,CellValue,RowIndex:int=-1,ColIndex:int=0):
-        if((RowIndex >= 0) and RowIndex < len(self.Rows)):
+        if((RowIndex >= 0) and (RowIndex < len(self.Rows))):
             self.CurrentRowIndex = RowIndex
         self.Body.SetValue(CellValue,self.CurrentRowIndex,ColIndex)
 
     def SetValueByUUID(self,CellValue,RowUUID:uuid.UUID,ColUUID:uuid.UUID):
-        OperRow = self.GetRowIndexByUUID(RowUUID)
-        OperCol = self.GetColIndexByUUID(ColUUID)
-        if((OperRow != -1) and (OperCol != -1)):
-            self.SetValueByIndex(CellValue,OperRow,OperCol)
-            self.CurrentRowIndex = OperRow
+        RowIndex = self.GetRowIndexByUUID(RowUUID)
+        ColIndex = self.GetColIndexByUUID(ColUUID)
+        if((RowIndex >= 0) and (ColIndex >= 0)):
+            self.SetValueByIndex(CellValue,RowIndex,ColIndex)
+            self.CurrentRowIndex = RowIndex
 
 
 
