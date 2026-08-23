@@ -16,8 +16,10 @@ import wx
 import wx.dataview
 import wx.lib.inspection
 import uuid
+from typing import Any
 
-
+########## 暂时不用的代码 ########
+'''
 class uiElements:
     CONTAINER = True
     Collection = None
@@ -79,8 +81,111 @@ class uiElements:
 
     def FindLabelByText() -> list:
         print("Wait for write")
+'''
 
+#############################################
+#############################################
+#############################################
+class ListView:
+    COLUMN_TYPE_TEXT = 1
+    COLUMN_TYPE_TOGGLE = 2
+    COLUMN_TYPE_PROGRESS = 3
 
+    #class Cell:
+    #    Name: str|None
+    #    Value: int|bool|str
+    #
+    #    def __init__(self,CellName:str|None,CellValue:int|bool|str):
+    #        self.Name = CellName
+    #        self.Value = CellValue
+
+    class Col:
+        UUID: uuid.UUID
+        Index: int
+        Name: str
+        Type: int
+        Width: int|None
+
+        def __init__(self,Parent:wx.dataview.DataViewListCtrl,ColIndex:int,ColName:str,ColType:int,ColWidth:int|None=None):
+            self.UUID = uuid.uuid4()
+            self.Index = ColIndex
+            self.Name = ColName
+            self.Type = ColType
+            if(ColWidth):
+                self.Width = ColWidth
+            else:
+                self.Width = wx.dataview.DVC_DEFAULT_WIDTH
+
+            match ColType:
+                case ListView.COLUMN_TYPE_TEXT:
+                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewTextRenderer(),ColIndex,self.Width))
+                case ListView.COLUMN_TYPE_TOGGLE:
+                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewToggleRenderer(mode=wx.dataview.DATAVIEW_CELL_ACTIVATABLE),ColIndex,self.Width))
+                case ListView.COLUMN_TYPE_PROGRESS:
+                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewProgressRenderer(),ColIndex,self.Width))  
+
+    class Row:
+        UUID: uuid.UUID
+        Index: int
+        Name: str|None
+        Cells: list
+        Values: list
+
+        def __init__(self,Parent:wx.dataview.DataViewListCtrl,RowIndex:int,RowValues:list,RowName:str|None=None):
+            self.UUID = uuid.uuid4()
+            self.Name = RowName
+            self.Values = RowValues
+            Parent.AppendItem(self.Values)
+
+    
+    Cols: list[Col]
+    Rows: list[Row]
+    Body: wx.dataview.DataViewListCtrl
+
+    def __init__(self,Parent:wx.Window,Position:wx.Point=wx.DefaultPosition,Size:wx.Size=wx.DefaultSize):
+        self.Body = wx.dataview.DataViewListCtrl(Parent,size=Size,style=wx.dataview.DV_ROW_LINES)
+        self.Cols = []
+        self.Rows = []
+
+    def AppendCol(self,Header:str):
+        ParamList = Header.split(':')
+        ParamCount = len(ParamList)
+        # 每列至少有 ColName 及 ColType 两个列参数,Width为可选参数
+        if(ParamCount >= 2):
+            ColName = ParamList[0]
+            ColType = ParamList[1]
+            ColWidth = None
+
+            match ColType:
+                case "text":
+                    ColType = self.COLUMN_TYPE_TEXT
+                case "toggle":
+                    ColType = self.COLUMN_TYPE_TOGGLE
+                case "progress":
+                    ColType = self.COLUMN_TYPE_PROGRESS
+                case _:
+                    ColType = None
+                    print("[X] List::AppendCol: \"" + Header + "\" ColType Err,Skiped.")
+
+            # 如果存在第三个列参数
+            if(ParamCount > 2):
+                if(ParamList[2].isdecimal()):
+                    ColWidth = int(ParamList[2])
+
+            # 全部通过检查后创建列并将其加入数组
+            if(ColType):
+                self.Cols.append(self.Col(self.Body,len(self.Cols),ColName,ColType,ColWidth))
+        else:
+            print("[X] List::AppendCol: \"" + Header + "\" Params not enough,Skiped.")
+
+    def SetCols(self,Headers:str):
+        # Exsample: "ColName:Type:Width|ColName:Type:Width|ColName:Type:Width"
+        # 按|分割列
+        for i in Headers.split('|'):
+            self.AppendCol(i)
+
+    def AppendRow(self,RowValues:list,RowName:str|None=None):
+        self.Rows.append(self.Row(self.Body,len(self.Rows),RowValues,RowName))
 
 
 class Debug:
@@ -89,14 +194,14 @@ class Debug:
 
 
 class Sticker:
-    Body = None
-    Element_vBox = None
-    Element_Data = None
-    Element_Subject = None
-    Text_Data = None
-    Text_Subject = None
-    Font_Data = None
-    Font_Subject = None
+    Body: wx.Panel
+    Element_vBox: wx.BoxSizer
+    Element_Data: wx.StaticText
+    Element_Subject: wx.StaticText
+    Text_Data: str
+    Text_Subject: str
+    Font_Data: wx.Font
+    Font_Subject: wx.Font
 
 #生成仪表盘中的单个含背景色的贴条
     def __init__(self,ParentPanel:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,FontColor:wx.Colour,Data:str|None=None,Subject:str|None=None,FontName:str="Tahoma",MainFontSize:int=16,HitsFontSize:int=10):
@@ -170,23 +275,23 @@ class Sticker:
 
 
 class AboutDialog:
-    Element_AboutDialog = None
-    Element_MainPanel = None
-    Container_MainvBox = None
-    Container_NamehBox = None
-    Container_SubtitlehBox = None
-    Container_VersionhBox = None
-    Container_CopyrighthBox = None
-    Container_DetailhBox = None
-    Container_DetailTextvBox = None
-    Container_ButtonhBox = None
-    Element_ProductName = None
-    Element_ProductSubtitle = None
-    Element_ProductVersion = None
-    Element_ProductCopyright = None
-    Element_ProductDetailContainer = None
-    Element_ProductDetail = None
-    Element_ButtonOK = None
+    Element_AboutDialog: wx.Dialog
+    Element_MainPanel: wx.Panel
+    Container_MainvBox: wx.BoxSizer
+    Container_NamehBox: wx.BoxSizer
+    Container_SubtitlehBox: wx.BoxSizer
+    Container_VersionhBox: wx.BoxSizer
+    Container_CopyrighthBox: wx.BoxSizer
+    Container_DetailhBox: wx.BoxSizer
+    Container_DetailTextvBox: wx.BoxSizer
+    Container_ButtonhBox: wx.BoxSizer
+    Element_ProductName: wx.StaticText
+    Element_ProductSubtitle: wx.StaticText
+    Element_ProductVersion: wx.StaticText
+    Element_ProductCopyright: wx.StaticText
+    Element_ProductDetailContainer: wx.Panel
+    Element_ProductDetail: wx.TextCtrl
+    Element_ButtonOK: wx.Button
     LOGO_MAX_WIDTH = 256
     LOGO_MAX_HEIGHT = 80
     BOX_SIZER_MARGIN_STEPPING = 5
@@ -305,16 +410,3 @@ class AboutDialog:
             self.Element_AboutDialog.EndModal(0)
         self.Element_AboutDialog.Destroy()
 
-
-# 一个带标题栏的垂直滚动列表控件，每列一个控件
-class ListView:
-    
-    Lines = []
-
-    def __init__(self):
-        # 先占位，等待后续编写 TBW
-        print("It's Run")
-
-    def AddLine(self,Elements:uiElements):
-        # 先占位，等待后续编写 TBW
-        print("It's Run")

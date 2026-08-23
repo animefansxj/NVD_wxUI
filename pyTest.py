@@ -164,6 +164,7 @@ def WinMain():
     MainWindow_StatusPanel.SetBackgroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['BG']))
     MainWindow_StatusPanel.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:ChangeWindowSize(MainWindow))
 
+    '''
     TableView = wx.dataview.DataViewListCtrl(MainWindow_LeftPanel,size=PANEL['LEFT']['SIZE'],style=wx.dataview.DV_ROW_LINES)
     TableView.AppendColumn(wx.dataview.DataViewColumn("UUID",wx.dataview.DataViewTextRenderer(),0))
     TableView.AppendColumn(wx.dataview.DataViewColumn("Enabled",wx.dataview.DataViewToggleRenderer(mode=wx.dataview.DATAVIEW_CELL_ACTIVATABLE),1,width=60))
@@ -172,8 +173,12 @@ def WinMain():
     TableView.AppendColumn(wx.dataview.DataViewColumn("Status",wx.dataview.DataViewTextRenderer(),4))
     TableView.GetColumn(0).SetHidden(True)
     TableView.AppendItem(["",True,"Name1",60,"Status1"])
+    '''
+    TableView = ui.ListView(MainWindow_LeftPanel,Size=PANEL['LEFT']['SIZE'])
+    TableView.SetCols("Enabled:toggle:60|Name:text:160|Progress:progress:80|Status:text")
+    TableView.AppendRow([True,"Name1",60,"60"],"Row1")
     LeftPanel_LeftvBox.AddSpacer(10)
-    LeftPanel_LeftvBox.Add(TableView,1,wx.EXPAND|wx.ALL,15)
+    LeftPanel_LeftvBox.Add(TableView.Body,1,wx.EXPAND|wx.ALL,15)
     LeftPanel_LeftvBox.AddStretchSpacer()
     LeftPanel_LeftvBox.AddSpacer(10)
 
