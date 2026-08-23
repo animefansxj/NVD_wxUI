@@ -10,6 +10,7 @@ try:
 except:
     PATH_PREFIX = None
 
+########## Const Values ##########
 BASE_WINDOW_SIZE = (900,600)
 LEFT_PANEL_WIDTH = 540
 STATUS_BAR_HEIGHT = 24
@@ -67,7 +68,7 @@ COLOR = {
     }
 }
 
-
+########## Event Handlers ##########
 def hBoxLine(wxObj1:wx.Window,wxObj2:wx.Window=None,Border:int|None=None):
     hBox = wx.BoxSizer(wx.HORIZONTAL)
     if(Border):
@@ -79,7 +80,6 @@ def hBoxLine(wxObj1:wx.Window,wxObj2:wx.Window=None,Border:int|None=None):
         hBox.Add(wxObj2,1,wx.EXPAND|wx.ALL,FinalBroder)
     hBox.AddStretchSpacer()
     return hBox
-
 
 def OnClickExit():
     exit(0)
@@ -101,9 +101,19 @@ def OnClickAbout(Parent:wx.Window):
         (480,400))
     AboutDialog.Show()
 
+def ChangeWindowSize(Parent:wx.Window):
+    if(Parent.GetClientSize()[0] != WINDOW['MAX_SIZE'][0]):
+        Parent.SetClientSize(WINDOW['MAX_SIZE'])
+    else:
+        Parent.SetClientSize(WINDOW['INITIAL_SIZE'])
+
+
+########## Main Window ###########
 def WinMain():
     App = wx.App()
-    MainWindow = wx.Frame(None,wx.ID_ANY,"Test wxPython App",style=wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER)
+    MainWindow = wx.Frame(None,wx.ID_ANY,"Test wxPython App",style=wx.CLOSE_BOX|wx.MINIMIZE_BOX)
+    # For Resizeable, Add wx.RESIZE_BORDER to flags
+    #MainWindow = wx.Frame(None,wx.ID_ANY,"Test wxPython App",style=wx.CLOSE_BOX|wx.MINIMIZE_BOX|wx.RESIZE_BORDER)
 
     MainMenu = wx.MenuBar()
     FileMenu = wx.Menu()
@@ -135,23 +145,24 @@ def WinMain():
     MainWindow_StatusPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['STATUS_BAR']['POS'],PANEL['STATUS_BAR']['SIZE'])
     MainWindow_DebugPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['DEBUG']['POS'],PANEL['DEBUG']['SIZE'])
     MainWindow_MainvBox = wx.BoxSizer(wx.VERTICAL)
-    MainWindow_ContenthBox = wx.BoxSizer(wx.HORIZONTAL)
-    MainWindow_StatushBox = wx.BoxSizer(wx.HORIZONTAL)
-    MainWindow_MainvBox.Add(MainWindow_ContenthBox,0,wx.EXPAND|wx.ALL)
+    MainvBox_ContenthBox = wx.BoxSizer(wx.HORIZONTAL)
+    MainWindow_MainvBox.Add(MainvBox_ContenthBox,0,wx.EXPAND|wx.ALL)
     MainWindow_MainvBox.Add(MainWindow_StatusPanel,0,wx.EXPAND|wx.ALL)
-    MainWindow_ContenthBox.Add(MainWindow_LeftPanel,0,wx.EXPAND|wx.ALL)
-    MainWindow_ContenthBox.Add(MainWindow_RightPanel,0,wx.EXPAND|wx.ALL)
-    MainWindow_ContenthBox.Add(MainWindow_DebugPanel,0,wx.EXPAND|wx.ALL)
-    MainWindow_LeftvBox = wx.BoxSizer(wx.VERTICAL)
-    MainWindow_RightvBox = wx.BoxSizer(wx.VERTICAL)
-    MainWindow_DebugvBox = wx.BoxSizer(wx.VERTICAL)
+    MainvBox_ContenthBox.Add(MainWindow_LeftPanel,0,wx.EXPAND|wx.ALL)
+    MainvBox_ContenthBox.Add(MainWindow_RightPanel,0,wx.EXPAND|wx.ALL)
+    MainvBox_ContenthBox.Add(MainWindow_DebugPanel,0,wx.EXPAND|wx.ALL)
+    LeftPanel_LeftvBox = wx.BoxSizer(wx.VERTICAL)
+    RightPanel_RightvBox = wx.BoxSizer(wx.VERTICAL)
+    DebugPanel_DebugvBox = wx.BoxSizer(wx.VERTICAL)
     MainWindow_MainPanel.SetSizer(MainWindow_MainvBox)
-    MainWindow_LeftPanel.SetSizer(MainWindow_LeftvBox)
-    MainWindow_RightPanel.SetSizer(MainWindow_RightvBox)
-    MainWindow_DebugPanel.SetSizer(MainWindow_DebugvBox)
-    MainWindow_StatusPanel.SetSizer(MainWindow_StatushBox)
+    MainWindow_LeftPanel.SetSizer(LeftPanel_LeftvBox)
+    MainWindow_RightPanel.SetSizer(RightPanel_RightvBox)
+    MainWindow_DebugPanel.SetSizer(DebugPanel_DebugvBox)
+    StatusBar_StatushBox = wx.BoxSizer(wx.HORIZONTAL)
+    MainWindow_StatusPanel.SetSizer(StatusBar_StatushBox)
     MainWindow_StatusPanel.SetForegroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['FG']))
     MainWindow_StatusPanel.SetBackgroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['BG']))
+    MainWindow_StatusPanel.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:ChangeWindowSize(MainWindow))
 
     TableView = wx.dataview.DataViewListCtrl(MainWindow_LeftPanel,size=PANEL['LEFT']['SIZE'],style=wx.dataview.DV_ROW_LINES)
     TableView.AppendColumn(wx.dataview.DataViewColumn("UUID",wx.dataview.DataViewTextRenderer(),0))
@@ -161,10 +172,10 @@ def WinMain():
     TableView.AppendColumn(wx.dataview.DataViewColumn("Status",wx.dataview.DataViewTextRenderer(),4))
     TableView.GetColumn(0).SetHidden(True)
     TableView.AppendItem(["",True,"Name1",60,"Status1"])
-    MainWindow_LeftvBox.AddSpacer(10)
-    MainWindow_LeftvBox.Add(TableView,1,wx.EXPAND|wx.ALL,15)
-    MainWindow_LeftvBox.AddStretchSpacer()
-    MainWindow_LeftvBox.AddSpacer(10)
+    LeftPanel_LeftvBox.AddSpacer(10)
+    LeftPanel_LeftvBox.Add(TableView,1,wx.EXPAND|wx.ALL,15)
+    LeftPanel_LeftvBox.AddStretchSpacer()
+    LeftPanel_LeftvBox.AddSpacer(10)
 
     STK1_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(330,60),wx.Colour(64,128,80),wx.Colour(255,255,255),"数据1","品目1","SimHei",16,10)
     STK2_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(200,60),wx.Colour(224,128,128),wx.Colour("#FFF"),"FF-FF-FF-FF-FF-FF","无线网卡MAC地址","SimHei",16,10)
@@ -174,16 +185,17 @@ def WinMain():
     Stickers.append(hBoxLine(STK1_1.Body,Border=5))
     Stickers.append(hBoxLine(STK2_1.Body,STK2_2.Body,Border=5))
 
-    MainWindow_RightvBox.AddSpacer(10)
+    RightPanel_RightvBox.AddSpacer(10)
     for line in Stickers:
-        MainWindow_RightvBox.Add(line)
-    MainWindow_RightvBox.AddStretchSpacer()
-    MainWindow_RightvBox.AddSpacer(10)
+        RightPanel_RightvBox.Add(line)
+    RightPanel_RightvBox.AddStretchSpacer()
+    RightPanel_RightvBox.AddSpacer(10)
 
     StatusText = wx.StaticText(MainWindow_StatusPanel,wx.ID_ANY,"Ready.")
     StatusText.SetFont(wx.Font(12,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,faceName="SimHei"))
     StatusText.SetForegroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['FG']))
-    MainWindow_StatushBox.Add(StatusText,1,wx.ALIGN_CENTER,4)
+    StatusBar_StatushBox.AddSpacer(10)
+    StatusBar_StatushBox.Add(StatusText,1,wx.ALIGN_CENTER,4)
 
     MainWindow_LeftPanel.Layout()
     MainWindow_RightPanel.Layout()
