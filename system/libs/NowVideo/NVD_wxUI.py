@@ -17,6 +17,17 @@ import wx.dataview
 import wx.lib.inspection
 import uuid
 from typing import Any
+from enum import Enum
+
+
+class ConstDefs(Enum):
+    # CtrlID
+    #  03 -- ListView
+    # SubID
+    #  01 -- Col
+    LISTVIEW_COL_TYPE_TEXT = 0x0311
+    LISTVIEW_COL_TYPE_TOGGLE = 0x0312
+    LISTVIEW_COL_TYPE_PROGRESS = 0x0313
 
 ########## 暂时不用的代码 ########
 '''
@@ -87,10 +98,6 @@ class uiElements:
 #############################################
 #############################################
 class ListView:
-    COLUMN_TYPE_TEXT = 1
-    COLUMN_TYPE_TOGGLE = 2
-    COLUMN_TYPE_PROGRESS = 3
-
     #class Cell:
     #    Name: str|None
     #    Value: int|bool|str
@@ -117,11 +124,11 @@ class ListView:
                 self.Width = wx.dataview.DVC_DEFAULT_WIDTH
 
             match ColType:
-                case ListView.COLUMN_TYPE_TEXT:
+                case ConstDefs.LISTVIEW_COL_TYPE_TEXT:
                     Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewTextRenderer(),ColIndex,self.Width))
-                case ListView.COLUMN_TYPE_TOGGLE:
+                case ConstDefs.LISTVIEW_COL_TYPE_TOGGLE:
                     Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewToggleRenderer(mode=wx.dataview.DATAVIEW_CELL_ACTIVATABLE),ColIndex,self.Width))
-                case ListView.COLUMN_TYPE_PROGRESS:
+                case ConstDefs.LISTVIEW_COL_TYPE_PROGRESS:
                     Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewProgressRenderer(),ColIndex,self.Width))  
 
     class Row:
@@ -158,11 +165,11 @@ class ListView:
 
             match ColType:
                 case "text":
-                    ColType = self.COLUMN_TYPE_TEXT
+                    ColType = ConstDefs.LISTVIEW_COL_TYPE_TEXT
                 case "toggle":
-                    ColType = self.COLUMN_TYPE_TOGGLE
+                    ColType = ConstDefs.LISTVIEW_COL_TYPE_TOGGLE
                 case "progress":
-                    ColType = self.COLUMN_TYPE_PROGRESS
+                    ColType = ConstDefs.LISTVIEW_COL_TYPE_PROGRESS
                 case _:
                     ColType = None
                     print("[X] List::AppendCol: \"" + Header + "\" ColType Err,Skiped.")
