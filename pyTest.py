@@ -5,7 +5,7 @@ import system.libs.NowVideo.NVD_wxUI as ui
 import DetailedInfo as D
 
 try:
-    PATH_PREFIX = SYS._MEPASS + '/'
+    PATH_PREFIX = sys._MEPASS + '/'
     print("[!] Boot from: " + PATH_PREFIX)
 except:
     PATH_PREFIX = None
@@ -29,7 +29,7 @@ PANEL = {
     },
     'STATUS_BAR': {
         'POS': (0,WINDOW['INITIAL_SIZE'][1]-STATUS_BAR_HEIGHT),
-        'SIZE': (WINDOW['INITIAL_SIZE'][0],STATUS_BAR_HEIGHT)
+        'SIZE': (WINDOW['MAX_SIZE'][0],STATUS_BAR_HEIGHT)
     },
     'DEBUG': {
         'POS': (WINDOW['INITIAL_SIZE'][0],0),
@@ -142,7 +142,6 @@ def WinMain():
     MainWindow_ContenthBox.Add(MainWindow_LeftPanel,0,wx.EXPAND|wx.ALL)
     MainWindow_ContenthBox.Add(MainWindow_RightPanel,0,wx.EXPAND|wx.ALL)
     MainWindow_ContenthBox.Add(MainWindow_DebugPanel,0,wx.EXPAND|wx.ALL)
-    MainWindow_StatushBox.Add(MainWindow_StatusPanel,0,wx.EXPAND|wx.ALL)
     MainWindow_LeftvBox = wx.BoxSizer(wx.VERTICAL)
     MainWindow_RightvBox = wx.BoxSizer(wx.VERTICAL)
     MainWindow_DebugvBox = wx.BoxSizer(wx.VERTICAL)
@@ -150,6 +149,7 @@ def WinMain():
     MainWindow_LeftPanel.SetSizer(MainWindow_LeftvBox)
     MainWindow_RightPanel.SetSizer(MainWindow_RightvBox)
     MainWindow_DebugPanel.SetSizer(MainWindow_DebugvBox)
+    MainWindow_StatusPanel.SetSizer(MainWindow_StatushBox)
     MainWindow_StatusPanel.SetForegroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['FG']))
     MainWindow_StatusPanel.SetBackgroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['BG']))
 
@@ -180,9 +180,15 @@ def WinMain():
     MainWindow_RightvBox.AddStretchSpacer()
     MainWindow_RightvBox.AddSpacer(10)
 
+    StatusText = wx.StaticText(MainWindow_StatusPanel,wx.ID_ANY,"Ready.")
+    StatusText.SetFont(wx.Font(12,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,faceName="SimHei"))
+    StatusText.SetForegroundColour(COLOR['STATUS_BAR']['READY']['FG'])
+    MainWindow_StatushBox.Add(StatusText,1,wx.ALIGN_CENTER)
+
     MainWindow_LeftPanel.Layout()
     MainWindow_RightPanel.Layout()
     MainWindow_DebugPanel.Layout()
+    MainWindow_MainPanel.Layout()
     MainWindow_MainPanel.Layout()
 
     # 显示主窗口
