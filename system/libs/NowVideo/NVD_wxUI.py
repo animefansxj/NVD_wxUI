@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260812A                  #
+#                Rev 20260823A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
