@@ -11,7 +11,7 @@ except:
     PATH_PREFIX = None
 
 BASE_WINDOW_SIZE = (900,600)
-LEFT_PANEL_WIDTH = 520
+LEFT_PANEL_WIDTH = 540
 STATUS_BAR_HEIGHT = 24
 
 WINDOW = {
@@ -138,7 +138,7 @@ def WinMain():
     MainWindow_ContenthBox = wx.BoxSizer(wx.HORIZONTAL)
     MainWindow_StatushBox = wx.BoxSizer(wx.HORIZONTAL)
     MainWindow_MainvBox.Add(MainWindow_ContenthBox,0,wx.EXPAND|wx.ALL)
-    MainWindow_MainvBox.Add(MainWindow_StatushBox,0,wx.EXPAND|wx.ALL)
+    MainWindow_MainvBox.Add(MainWindow_StatusPanel,0,wx.EXPAND|wx.ALL)
     MainWindow_ContenthBox.Add(MainWindow_LeftPanel,0,wx.EXPAND|wx.ALL)
     MainWindow_ContenthBox.Add(MainWindow_RightPanel,0,wx.EXPAND|wx.ALL)
     MainWindow_ContenthBox.Add(MainWindow_DebugPanel,0,wx.EXPAND|wx.ALL)
@@ -182,13 +182,13 @@ def WinMain():
 
     StatusText = wx.StaticText(MainWindow_StatusPanel,wx.ID_ANY,"Ready.")
     StatusText.SetFont(wx.Font(12,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,faceName="SimHei"))
-    StatusText.SetForegroundColour(COLOR['STATUS_BAR']['READY']['FG'])
-    MainWindow_StatushBox.Add(StatusText,1,wx.ALIGN_CENTER)
+    StatusText.SetForegroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['FG']))
+    MainWindow_StatushBox.Add(StatusText,1,wx.ALIGN_CENTER,4)
 
     MainWindow_LeftPanel.Layout()
     MainWindow_RightPanel.Layout()
     MainWindow_DebugPanel.Layout()
-    MainWindow_MainPanel.Layout()
+    MainWindow_StatusPanel.Layout()
     MainWindow_MainPanel.Layout()
 
     # 显示主窗口
