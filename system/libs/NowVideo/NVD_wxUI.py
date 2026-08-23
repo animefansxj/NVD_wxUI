@@ -132,6 +132,7 @@ class ListView:
                     Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewProgressRenderer(),ColIndex,self.Width))  
 
     class Row:
+        #Handler: wx.wx.dataview.DataViewListCtrl
         UUID: uuid.UUID
         Index: int
         Name: str|None
@@ -139,6 +140,7 @@ class ListView:
         Values: list
 
         def __init__(self,Parent:wx.dataview.DataViewListCtrl,RowIndex:int,RowValues:list,RowName:str|None=None):
+            #self.Handler = Parent
             self.UUID = uuid.uuid4()
             self.Name = RowName
             self.Values = RowValues
@@ -147,12 +149,14 @@ class ListView:
     
     Cols: list[Col]
     Rows: list[Row]
+    CurrentRowIndex: int
     Body: wx.dataview.DataViewListCtrl
 
     def __init__(self,Parent:wx.Window,Position:wx.Point=wx.DefaultPosition,Size:wx.Size=wx.DefaultSize):
         self.Body = wx.dataview.DataViewListCtrl(Parent,size=Size,style=wx.dataview.DV_ROW_LINES)
         self.Cols = []
         self.Rows = []
+        self.CurrentRowIndex = 0
 
     def AppendCol(self,Header:str):
         ParamList = Header.split(':')
@@ -193,6 +197,54 @@ class ListView:
 
     def AppendRow(self,RowValues:list,RowName:str|None=None):
         self.Rows.append(self.Row(self.Body,len(self.Rows),RowValues,RowName))
+
+    def GetCurrentCoordinates(self) -> tuple:
+        return (self.CurrentRowIndex,0)
+
+    def GetColUUIDs(self) -> list:
+        ColUUIDs = []
+        for i in self.Cols:
+            ColUUIDs.append(i.UUID)
+        return ColUUIDs
+
+    def GetColIndexByUUID(self,ColUUID:uuid.UUID) -> int:
+        for i in self.Cols:
+            if(i.UUID == ColUUID):
+                return i.Index
+        return -1
+
+    def GetColIndexByName(self,ColName:str) -> int:
+        ColIndexList = []
+        for i in self.Cols:
+            if(i.Name == ColName):
+                ColIndexList.append(i.Index)
+        return ColIndexList
+
+    def GetRowIndexByUUID(self,RowUUID:uuid.UUID) -> int:
+        for i in self.Rows:
+            if(i.UUID == RowUUID):
+                return i.Index
+        return -1
+
+    def GetRowIndexByName(self,RowName:str) -> list:
+        RowIndexList = []
+        for i in self.Rows:
+            if(i.Name == RowName):
+                RowIndexList.append(i.Index)
+        return RowIndexList
+
+    def SetValueByIndex(self,CellValue,RowIndex:int=-1,ColIndex:int=0):
+        if((RowIndex >= 0) and RowIndex < len(self.Rows)):
+            self.CurrentRowIndex = RowIndex
+        self.Body.SetValue(CellValue,self.CurrentRowIndex,ColIndex)
+
+    def SetValueByUUID(self,CellValue,RowUUID:uuid.UUID,ColUUID:uuid.UUID):
+        OperRow = self.GetRowIndexByUUID(RowUUID)
+        OperCol = self.GetColIndexByUUID(ColUUID)
+        if((OperRow != -1) and (OperCol != -1)):
+            self.SetValueByIndex(CellValue,OperRow,OperCol)
+            self.CurrentRowIndex = OperRow
+
 
 
 class Debug:
