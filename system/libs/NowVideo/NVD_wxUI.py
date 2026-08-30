@@ -514,6 +514,11 @@ class Sticker:
         self.Element_Data.Bind(Event,Handler)
         self.Element_Subject.Bind(Event,Handler)
 
+    def ClickCopyAll(self,Event:wx.PyEventBinder):
+        self.Body.Bind(Event,lambda Event:pyperclip.copy(self.Text_Subject + ": " + self.Text_Data))
+        self.Element_Data.Bind(Event,lambda Event:pyperclip.copy(self.Text_Subject + ": " + self.Text_Data))
+        self.Element_Subject.Bind(Event,lambda Event:pyperclip.copy(self.Text_Subject + ": " + self.Text_Data))
+
     def ClickCopyData(self,Event:wx.PyEventBinder):
         self.Body.Bind(Event,lambda Event:pyperclip.copy(self.Text_Data))
         self.Element_Data.Bind(Event,lambda Event:pyperclip.copy(self.Text_Data))

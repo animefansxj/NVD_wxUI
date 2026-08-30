@@ -204,7 +204,7 @@ def WinMain():
     STK1_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(330,60),wx.Colour(64,128,80),wx.Colour(255,255,255),"Data 1","Subject 1","SimHei",16,10)
     STK2_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(200,60),wx.Colour(224,128,128),wx.Colour("#FFF"),"Data 2","Subject 2","SimHei",16,10)
     STK2_2 = ui.Sticker(MainWindow_RightPanel,(0,0),(120,60),wx.Colour(128,128,224),wx.Colour("#FFF"),"Data 3","Subject 3","SimHei",16,10)
-    STK1_1.ClickCopyData(wx.EVT_RIGHT_UP)
+    STK1_1.ClickCopyAll(wx.EVT_RIGHT_UP)
     STK2_1.ClickCopyData(wx.EVT_RIGHT_UP)
     STK2_2.ClickCopyData(wx.EVT_RIGHT_UP)
 
