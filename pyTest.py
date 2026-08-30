@@ -1,6 +1,7 @@
 import wx
 import wx.dataview
 import sys
+import pyperclip
 import datetime
 import system.libs.NowVideo.NVD_wxUI as ui
 import DetailedInfo as D
@@ -189,16 +190,6 @@ def WinMain():
     MainWindow_StatusPanel.SetBackgroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['BG']))
     MainWindow_StatusPanel.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:ToggleWindowSize(MainWindow))
 
-    '''
-    TableView = wx.dataview.DataViewListCtrl(MainWindow_LeftPanel,size=PANEL['LEFT']['SIZE'],style=wx.dataview.DV_ROW_LINES)
-    TableView.AppendColumn(wx.dataview.DataViewColumn("UUID",wx.dataview.DataViewTextRenderer(),0))
-    TableView.AppendColumn(wx.dataview.DataViewColumn("Enabled",wx.dataview.DataViewToggleRenderer(mode=wx.dataview.DATAVIEW_CELL_ACTIVATABLE),1,width=60))
-    TableView.AppendColumn(wx.dataview.DataViewColumn("Name",wx.dataview.DataViewTextRenderer(),2,width=160))
-    TableView.AppendColumn(wx.dataview.DataViewColumn("Progress",wx.dataview.DataViewProgressRenderer(),3,width=80))
-    TableView.AppendColumn(wx.dataview.DataViewColumn("Status",wx.dataview.DataViewTextRenderer(),4))
-    TableView.GetColumn(0).SetHidden(True)
-    TableView.AppendItem(["",True,"Name1",60,"Status1"])
-    '''
     TableView = ui.ListView(MainWindow_LeftPanel,Size=PANEL['LEFT']['SIZE'])
     TableView.SetCols("Enabled:toggle:60|Name:text:160|Progress:progress:80|Status:text")
     TableView.AppendRow([True,"Name 1",60,"Status 1"],"Row1")
@@ -210,6 +201,9 @@ def WinMain():
     STK1_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(330,60),wx.Colour(64,128,80),wx.Colour(255,255,255),"Data 1","Subject 1","SimHei",16,10)
     STK2_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(200,60),wx.Colour(224,128,128),wx.Colour("#FFF"),"Data 2","Subject 2","SimHei",16,10)
     STK2_2 = ui.Sticker(MainWindow_RightPanel,(0,0),(120,60),wx.Colour(128,128,224),wx.Colour("#FFF"),"Data 3","Subject 3","SimHei",16,10)
+    STK1_1.Body.Bind(wx.EVT_RIGHT_UP,lambda Event:pyperclip.copy("Data 1"))
+    STK2_1.Body.Bind(wx.EVT_RIGHT_UP,lambda Event:pyperclip.copy("Data 2"))
+    STK2_2.Body.Bind(wx.EVT_RIGHT_UP,lambda Event:pyperclip.copy("Data 3"))
 
     Stickers = []
     Stickers.append(hBoxLine(STK1_1.Body,Border=5))
