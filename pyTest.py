@@ -197,6 +197,9 @@ def WinMain():
     LeftPanel_LeftvBox.Add(TableView.Body,1,wx.EXPAND|wx.ALL,15)
     LeftPanel_LeftvBox.AddStretchSpacer()
     LeftPanel_LeftvBox.AddSpacer(10)
+    TableView.SetValueByIndex("Modified 1",0,TableView.GetColIndexByName("Status")[0])
+    print(TableView.GetColIndexByName("Status"))
+    print(TableView.GetRowIndexByValue("Modified 1",TableView.GetColIndexByName("Status")[0]))
 
     STK1_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(330,60),wx.Colour(64,128,80),wx.Colour(255,255,255),"Data 1","Subject 1","SimHei",16,10)
     STK2_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(200,60),wx.Colour(224,128,128),wx.Colour("#FFF"),"Data 2","Subject 2","SimHei",16,10)
@@ -215,26 +218,17 @@ def WinMain():
     RightPanel_RightvBox.AddStretchSpacer()
     RightPanel_RightvBox.AddSpacer(10)
 
-    Debug_RowCount = 0
-    DebugPanel_DebugView = wx.ListCtrl(MainWindow_DebugPanel,wx.ID_ANY,size=PANEL['DEBUG']['SIZE'],style=wx.LC_REPORT,name="DebugView")
-    DebugPanel_DebugView.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,50)
-    DebugPanel_DebugView.InsertColumn(1,"Time",width=140)
-    DebugPanel_DebugView.InsertColumn(2,"Source",width=70)
-    DebugPanel_DebugView.InsertColumn(3,"Message",width=500)
+
+    DebugPanel_DebugView = ui.LogView(MainWindow_DebugPanel,Size=PANEL['DEBUG']['SIZE'])
+    DebugPanel_DebugView.SetDateTimeFormat("%Y-%m-%d %H:%M")
+    DebugPanel_DebugView.SetTitles({'Urgency':"级别",'DateTime':"时间",'Source':"来源",'Message':"消息"})
     if(PATH_PREFIX):
-        DebugPanel_DebugView.Append(["INFO",GetDateTime(),"Main","Boot from: " + PATH_PREFIX])
-        DebugPanel_DebugView.SetItemTextColour(Debug_RowCount,wx.Colour(COLOR['DEBUG']['INFO']['FG']))
-        Debug_RowCount += 1
-    DebugPanel_DebugView.Append(["WARN",GetDateTime(),"Main","Test Msg."])
-    DebugPanel_DebugView.SetItemTextColour(Debug_RowCount,wx.Colour(COLOR['DEBUG']['WARN']['FG']))
-    Debug_RowCount += 1
-    DebugPanel_DebugView.Append(["ERR",GetDateTime(),"Main","Test Msg."])
-    DebugPanel_DebugView.SetItemTextColour(Debug_RowCount,wx.Colour(COLOR['DEBUG']['ERR']['FG']))
-    Debug_RowCount += 1
-    DebugPanel_DebugView.Append(["SUCC",GetDateTime(),"Main","Test Msg."])
-    DebugPanel_DebugView.SetItemTextColour(Debug_RowCount,wx.Colour(COLOR['DEBUG']['SUCC']['FG']))
-    Debug_RowCount += 1
-    DebugPanel_DebugvBox.Add(DebugPanel_DebugView,1,wx.EXPAND|wx.ALL,15)
+        DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Boot from: " + PATH_PREFIX)
+    DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Test Msg.")
+    DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_WARN,"Main","Test Msg.")
+    DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_ERRO,"Main","Test Msg.")
+    DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_SUCC,"Main","Test Msg.")
+    DebugPanel_DebugvBox.Add(DebugPanel_DebugView.Body,1,wx.EXPAND|wx.ALL,15)
 
 
     StatusText = wx.StaticText(MainWindow_StatusPanel,wx.ID_ANY,"Ready.")

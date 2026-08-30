@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260823B                  #
+#                Rev 20260830A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -16,18 +16,46 @@ import wx
 import wx.dataview
 import wx.lib.inspection
 import uuid
+import datetime
 from typing import Any
 from enum import Enum
 
+DATETIMEFORMAT = "%Y-%m-%d %H:%M:%S"
+COLOR = {
+    'LOG': {
+        'INFO': {
+            'BG': "#FFFFFF",
+            'FG': "#0055C5"
+        },
+        'WARN': {
+            'BG': "#FFFFFF",
+            'FG': "#BE9200"
+        },
+        'ERRO': {
+            'BG': "#FFFFFF",
+            'FG': "#C90043"
+        },
+        'SUCC': {
+            'BG': "#FFFFFF",
+            'FG': "#00B45A"
+        }
+    }
+}
 
 class ConstDefs(Enum):
     # CtrlID
     #  03 -- ListView
     # SubID
-    #  01 -- Col
+    #  (ListView) 1 -- Col
+    #  (LogView)  1 -- Urgency
     LISTVIEW_COL_TYPE_TEXT = 0x0311
     LISTVIEW_COL_TYPE_TOGGLE = 0x0312
     LISTVIEW_COL_TYPE_PROGRESS = 0x0313
+    LOGVIEW_URGENCY_INFO = 0x0411
+    LOGVIEW_URGENCY_WARN = 0x0412
+    LOGVIEW_URGENCY_ERRO = 0x0413
+    LOGVIEW_URGENCY_SUCC = 0x0414
+
 
 ########## 暂时不用的代码 ########
 '''
@@ -53,7 +81,7 @@ class uiElements:
             self.Parent = Element
 
 
-    # 用于承载元素的聚合，如一个Line或者Bundle中的所有元素
+    # 用于承载元素的聚合, 如一个Line或者Bundle中的所有元素
     class wxObjs:
         UUID = None
         Parent = None
@@ -132,31 +160,52 @@ class ListView:
                     Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewProgressRenderer(),ColIndex,self.Width))  
 
     class Row:
-        #Handler: wx.wx.dataview.DataViewListCtrl
+        Parent: wx.dataview.DataViewListCtrl
         UUID: uuid.UUID
         Index: int
         Name: str|None
         Cells: list
-        Values: list
 
         def __init__(self,Parent:wx.dataview.DataViewListCtrl,RowIndex:int,RowValues:list,RowName:str|None=None):
-            #self.Handler = Parent
+            self.Parent = Parent
             self.UUID = uuid.uuid4()
             self.Name = RowName
-            self.Values = RowValues
-            Parent.AppendItem(self.Values)
+            self.Cells = RowValues
+            # 判断 RowIndex 的合法性
+            if((RowIndex >=0) and (RowIndex <= self.Parent.GetItemCount())):
+                self.Index = RowIndex
+            else:
+                self.Index = self.Parent.GetItemCount()
+
+        def Append(self):
+            self.Index = self.Parent.GetItemCount()
+            self.Parent.AppendItem(self.Cells)
+
+        def SetCell(self,ColIndex:int,Value) -> bool:
+            if(ColIndex >= 0 and ColIndex < len(self.Cells)):
+                self.Cells[ColIndex] = Value
+                self.Parent.SetValue(Value,self.Index,ColIndex)
+                return True
+            return False
+
+        def IsValueMatched(self,ColIndex:int,Value) -> bool:
+            if(ColIndex >= 0 and ColIndex < len(self.Cells)):
+                if(self.Cells[ColIndex] == Value):
+                    return True
+            return False
 
     
     Cols: list[Col]
     Rows: list[Row]
-    CurrentRowIndex: int
+    # this: last appended of modified row and col index [rowIndex,colIndex]
+    this: list[int,int]
     Body: wx.dataview.DataViewListCtrl
 
     def __init__(self,Parent:wx.Window,Position:wx.Point=wx.DefaultPosition,Size:wx.Size=wx.DefaultSize):
         self.Body = wx.dataview.DataViewListCtrl(Parent,size=Size,style=wx.dataview.DV_ROW_LINES)
         self.Cols = []
         self.Rows = []
-        self.CurrentRowIndex = 0
+        self.this = [0,0]
 
     def AppendCol(self,Header:str):
         ParamList = Header.split(':')
@@ -197,9 +246,11 @@ class ListView:
 
     def AppendRow(self,RowValues:list,RowName:str|None=None):
         self.Rows.append(self.Row(self.Body,len(self.Rows),RowValues,RowName))
+        self.this = [len(self.Rows)-1,0]
+        self.Rows[self.this[0]].Append()
 
     def GetCurrentCoordinates(self) -> tuple:
-        return (self.CurrentRowIndex,0)
+        return tuple(self.this)
 
     def GetColUUIDs(self) -> list:
         ColUUIDs = []
@@ -233,18 +284,150 @@ class ListView:
                 RowIndexList.append(i.Index)
         return RowIndexList
 
-    def SetValueByIndex(self,CellValue,RowIndex:int=-1,ColIndex:int=0):
-        if((RowIndex >= 0) and (RowIndex < len(self.Rows))):
-            self.CurrentRowIndex = RowIndex
-        self.Body.SetValue(CellValue,self.CurrentRowIndex,ColIndex)
+    def GetRowIndexByValue(self,CellValue,ColIndex:int=0) -> list:
+        RowIndexList = []
+        for i in range(len(self.Rows)):
+            if self.Rows[i].IsValueMatched(ColIndex,CellValue):
+                RowIndexList.append(i)
+        return RowIndexList
 
-    def SetValueByUUID(self,CellValue,RowUUID:uuid.UUID,ColUUID:uuid.UUID):
+    def SetValueByIndex(self,CellValue,RowIndex:int=-1,ColIndex:int=0) -> bool:
+        # 检查参数有效性
+        if((RowIndex >= 0) and (RowIndex < len(self.Rows))):
+            if(self.Rows[RowIndex].SetCell(ColIndex,CellValue)):
+                self.this = [RowIndex,ColIndex]
+                return True
+        return False
+
+    def SetValueByUUID(self,CellValue,RowUUID:uuid.UUID,ColUUID:uuid.UUID) -> bool:
         RowIndex = self.GetRowIndexByUUID(RowUUID)
         ColIndex = self.GetColIndexByUUID(ColUUID)
+        # 如果能够找到UUID对应的行和列
         if((RowIndex >= 0) and (ColIndex >= 0)):
-            self.SetValueByIndex(CellValue,RowIndex,ColIndex)
-            self.CurrentRowIndex = RowIndex
+            return self.SetValueByIndex(CellValue,RowIndex,ColIndex)
+        return False
 
+
+class LogView:
+
+    class Row:
+        Parent: wx.ListCtrl
+        UUID: uuid.UUID
+        Index: int
+        Urgency: int
+        Type: str
+        DateTime: datetime.datetime
+        Source: str
+        Message: str
+
+        def __init__(self,Parent:wx.ListCtrl,RowIndex:int,Urgency:int,Source:str,Message:str,DateTimeFormat):
+            self.Parent = Parent
+            self.UUID = uuid.uuid4()
+            self.Index = RowIndex
+            self.Urgency = Urgency
+            self.DateTime = datetime.datetime.now()
+            self.Source = Source
+            self.Message = Message
+            match(self.Urgency):
+                case ConstDefs.LOGVIEW_URGENCY_WARN:
+                    self.Type = "WARN"
+                case ConstDefs.LOGVIEW_URGENCY_ERRO:
+                    self.Type = "ERRO"
+                case ConstDefs.LOGVIEW_URGENCY_SUCC:
+                    self.Type = "SUCC"
+                case _:
+                    self.Type = "INFO"
+            self.Parent.Append([self.Type,self.DateTime.strftime(DateTimeFormat),self.Source,self.Message])
+
+        def Color(self,Colors:dict):
+            self.Parent.SetItemTextColour(self.Index,wx.Colour(Colors['FG']))
+            self.Parent.SetItemBackgroundColour(self.Index,wx.Colour(Colors['BG']))
+
+    DateTimeFormat: str
+    Rows: list[Row]
+    this: int
+    Body: wx.ListCtrl
+    Colors: dict
+
+    def __init__(self,Parent:wx.Window,Position:wx.Point=wx.DefaultPosition,Size:wx.Size=wx.DefaultSize):
+        self.Body = wx.ListCtrl(Parent,wx.ID_ANY,size=Size,style=wx.LC_REPORT)
+        self.DateTimeFormat = DATETIMEFORMAT
+        self.Body.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,50)
+        self.Body.InsertColumn(1,"Time",width=140)
+        self.Body.InsertColumn(2,"Source",width=70)
+        self.Body.InsertColumn(3,"Message",width=500)
+        self.Rows = []
+        self.Colors = {
+            ConstDefs.LOGVIEW_URGENCY_INFO: {
+                'BG': COLOR['LOG']['INFO']['BG'],
+                'FG': COLOR['LOG']['INFO']['FG']
+            },
+            ConstDefs.LOGVIEW_URGENCY_WARN: {
+                'BG': COLOR['LOG']['WARN']['BG'],
+                'FG': COLOR['LOG']['WARN']['FG']
+            },
+            ConstDefs.LOGVIEW_URGENCY_ERRO: {
+                'BG': COLOR['LOG']['ERRO']['BG'],
+                'FG': COLOR['LOG']['ERRO']['FG']
+            },
+            ConstDefs.LOGVIEW_URGENCY_SUCC: {
+                'BG': COLOR['LOG']['SUCC']['BG'],
+                'FG': COLOR['LOG']['SUCC']['FG']
+            }
+        }
+        self.this = 0
+
+    def Append(self,Urgency:int,Source:str,Message:str,Color:bool=True):
+        self.Rows.append(self.Row(self.Body,len(self.Rows),Urgency,Source,Message,self.DateTimeFormat))
+        self.this = len(self.Rows)-1
+        if(Color):
+            if Urgency in ConstDefs:
+                self.Rows[self.this].Color(self.Colors[Urgency])
+
+    def SetColors(self,Urgency:int,FGColor:str|None=None,BGColor:str|None=None):
+        if Urgency in ConstDefs:
+            if(FGColor):
+                self.Colors[Urgency]['FG'] = FGColor
+            if(BGColor):
+                self.Colors[Urgency]['BG'] = BGColor
+
+    def SetDateTimeFormat(self,Format:str):
+        self.DateTimeFormat = Format
+
+    def SetTitles(self,Title:dict={'Urgency':"Lv",'DateTime':"Time",'Source':"Source",'Message':"Message"}):
+        if 'Urgency' in Title:
+            Column = self.Body.GetColumn(0)
+            Column.SetText(Title['Urgency'])
+            self.Body.SetColumn(0,Column)
+        if 'DateTime' in Title:
+            Column = self.Body.GetColumn(1)
+            Column.SetText(Title['DateTime'])
+            self.Body.SetColumn(1,Column)
+        if 'Source' in Title:
+            Column = self.Body.GetColumn(2)
+            Column.SetText(Title['Source'])
+            self.Body.SetColumn(2,Column)
+        if 'Message' in Title:
+            Column = self.Body.GetColumn(3)
+            Column.SetText(Title['Message'])
+            self.Body.SetColumn(3,Column)
+
+    def SetColumnsWidth(self,Width:dict={'Urgency':50,'DateTime':140,'Source':70,'Message':500}):
+        if 'Urgency' in Width:
+            self.Body.SetColumnWidth(0,Width['Urgency'])
+        if 'DateTime' in Width:
+            self.Body.SetColumnWidth(1,Width['DateTime'])
+        if 'Source' in Width:
+            self.Body.SetColumnWidth(2,Width['Source'])
+        if 'Message' in Width:
+            self.Body.SetColumnWidth(3,Width['Message'])
+    
+    '''
+    def SetColumnsWidth(self,Width:list):
+        for i in range(self.Body.GetColumnCount()):
+            if(Width[i] > 0):
+                self.Body.SetColumnWidth(i,Width[i])
+    '''
 
 
 class Debug:
