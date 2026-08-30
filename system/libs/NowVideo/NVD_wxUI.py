@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260830A                  #
+#                Rev 20260830B                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -514,15 +514,15 @@ class Sticker:
         self.Element_Data.Bind(Event,Handler)
         self.Element_Subject.Bind(Event,Handler)
 
-    def ClickCopyAll(self,Event:wx.PyEventBinder):
-        self.Body.Bind(Event,lambda Event:pyperclip.copy(self.Text_Subject + ": " + self.Text_Data))
-        self.Element_Data.Bind(Event,lambda Event:pyperclip.copy(self.Text_Subject + ": " + self.Text_Data))
-        self.Element_Subject.Bind(Event,lambda Event:pyperclip.copy(self.Text_Subject + ": " + self.Text_Data))
+    def ClickCopyAll(self,Event:wx.PyEventBinder,Handler:function=lambda:None):
+        self.Body.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Subject + ": " + self.Text_Data),Handler()))
+        self.Element_Data.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Subject + ": " + self.Text_Data),Handler()))
+        self.Element_Subject.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Subject + ": " + self.Text_Data),Handler()))
 
-    def ClickCopyData(self,Event:wx.PyEventBinder):
-        self.Body.Bind(Event,lambda Event:pyperclip.copy(self.Text_Data))
-        self.Element_Data.Bind(Event,lambda Event:pyperclip.copy(self.Text_Data))
-        self.Element_Subject.Bind(Event,lambda Event:pyperclip.copy(self.Text_Data))
+    def ClickCopyData(self,Event:wx.PyEventBinder,Handler:function=lambda:None):
+        self.Body.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Data),Handler()))
+        self.Element_Data.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Data),Handler()))
+        self.Element_Subject.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Data),Handler()))
 
 
 class AboutDialog:

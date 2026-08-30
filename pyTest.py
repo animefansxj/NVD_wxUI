@@ -190,6 +190,18 @@ def WinMain():
     MainWindow_StatusPanel.SetBackgroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['BG']))
     MainWindow_StatusPanel.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:ToggleWindowSize(MainWindow))
 
+    DebugPanel_DebugView = ui.LogView(MainWindow_DebugPanel,Size=PANEL['DEBUG']['SIZE'])
+    DebugPanel_DebugView.SetDateTimeFormat("%Y-%m-%d %H:%M")
+    DebugPanel_DebugView.SetTitles({'Urgency':"级别",'DateTime':"时间",'Source':"来源",'Message':"消息"})
+    if(PATH_PREFIX):
+        DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Boot from: " + PATH_PREFIX)
+    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Test Msg.")
+    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_WARN,"Main","Test Msg.")
+    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_ERRO,"Main","Test Msg.")
+    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_SUCC,"Main","Test Msg.")
+    DebugPanel_DebugvBox.Add(DebugPanel_DebugView.Body,1,wx.EXPAND|wx.ALL,15)
+
+
     TableView = ui.ListView(MainWindow_LeftPanel,Size=PANEL['LEFT']['SIZE'])
     TableView.SetCols("Enabled:toggle:60|Name:text:160|Progress:progress:80|Status:text")
     TableView.AppendRow([True,"Name 1",60,"Status 1"],"Row1")
@@ -204,8 +216,8 @@ def WinMain():
     STK1_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(330,60),wx.Colour(64,128,80),wx.Colour(255,255,255),"Data 1","Subject 1","SimHei",16,10)
     STK2_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(200,60),wx.Colour(224,128,128),wx.Colour("#FFF"),"Data 2","Subject 2","SimHei",16,10)
     STK2_2 = ui.Sticker(MainWindow_RightPanel,(0,0),(120,60),wx.Colour(128,128,224),wx.Colour("#FFF"),"Data 3","Subject 3","SimHei",16,10)
-    STK1_1.ClickCopyAll(wx.EVT_RIGHT_UP)
-    STK2_1.ClickCopyData(wx.EVT_RIGHT_UP)
+    STK1_1.ClickCopyAll(wx.EVT_RIGHT_UP,lambda:DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Sticker","Data Copied"))
+    STK2_1.ClickCopyData(wx.EVT_RIGHT_UP,lambda:DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Sticker","Data Copied"))
     STK2_2.ClickCopyData(wx.EVT_RIGHT_UP)
 
     Stickers = []
@@ -217,19 +229,6 @@ def WinMain():
         RightPanel_RightvBox.Add(line)
     RightPanel_RightvBox.AddStretchSpacer()
     RightPanel_RightvBox.AddSpacer(10)
-
-
-    DebugPanel_DebugView = ui.LogView(MainWindow_DebugPanel,Size=PANEL['DEBUG']['SIZE'])
-    DebugPanel_DebugView.SetDateTimeFormat("%Y-%m-%d %H:%M")
-    DebugPanel_DebugView.SetTitles({'Urgency':"级别",'DateTime':"时间",'Source':"来源",'Message':"消息"})
-    if(PATH_PREFIX):
-        DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Boot from: " + PATH_PREFIX)
-    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Test Msg.")
-    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_WARN,"Main","Test Msg.")
-    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_ERRO,"Main","Test Msg.")
-    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_SUCC,"Main","Test Msg.")
-    DebugPanel_DebugvBox.Add(DebugPanel_DebugView.Body,1,wx.EXPAND|wx.ALL,15)
-
 
     StatusText = wx.StaticText(MainWindow_StatusPanel,wx.ID_ANY,"Ready.")
     StatusText.SetFont(wx.Font(12,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,faceName="SimHei"))
