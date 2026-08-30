@@ -1,6 +1,7 @@
 import wx
 import wx.dataview
 import sys
+import datetime
 import system.libs.NowVideo.NVD_wxUI as ui
 import DetailedInfo as D
 
@@ -48,6 +49,24 @@ COLOR = {
             'FG': "#000000"
         }
     },
+    'DEBUG': {
+        'INFO': {
+            'BG': "#FFFFFF",
+            'FG': "#0055C5"
+        },
+        'WARN': {
+            'BG': "#FFFFFF",
+            'FG': "#BE9200"
+        },
+        'ERR': {
+            'BG': "#FFFFFF",
+            'FG': "#C90043"
+        },
+        'SUCC': {
+            'BG': "#FFFFFF",
+            'FG': "#00B45A"
+        }
+    },
     'STATUS_BAR': {
         'READY': {
             'BG': "#000000",
@@ -68,7 +87,10 @@ COLOR = {
     }
 }
 
-########## Event Handlers ##########
+########## Function predefined ##########
+def GetDateTime():
+    return str(datetime.datetime.now())[0:-7]
+
 def hBoxLine(wxObj1:wx.Window,wxObj2:wx.Window=None,Border:int|None=None):
     hBox = wx.BoxSizer(wx.HORIZONTAL)
     if(Border):
@@ -81,6 +103,7 @@ def hBoxLine(wxObj1:wx.Window,wxObj2:wx.Window=None,Border:int|None=None):
     hBox.AddStretchSpacer()
     return hBox
 
+########## Event Handlers ##########
 def OnClickExit():
     exit(0)
 
@@ -101,10 +124,12 @@ def OnClickAbout(Parent:wx.Window):
         (480,400))
     AboutDialog.Show()
 
-def ChangeWindowSize(Parent:wx.Window):
+def ToggleWindowSize(Parent:wx.Window):
     if(Parent.GetClientSize()[0] != WINDOW['MAX_SIZE'][0]):
+        print("StatusBar Double Click Event Recived, Expand Workspace!")
         Parent.SetClientSize(WINDOW['MAX_SIZE'])
     else:
+        print("StatusBar Double Click Event Recived, Shrink Workspace!")
         Parent.SetClientSize(WINDOW['INITIAL_SIZE'])
 
 
@@ -162,7 +187,7 @@ def WinMain():
     MainWindow_StatusPanel.SetSizer(StatusBar_StatushBox)
     MainWindow_StatusPanel.SetForegroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['FG']))
     MainWindow_StatusPanel.SetBackgroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['BG']))
-    MainWindow_StatusPanel.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:ChangeWindowSize(MainWindow))
+    MainWindow_StatusPanel.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:ToggleWindowSize(MainWindow))
 
     '''
     TableView = wx.dataview.DataViewListCtrl(MainWindow_LeftPanel,size=PANEL['LEFT']['SIZE'],style=wx.dataview.DV_ROW_LINES)
@@ -196,9 +221,32 @@ def WinMain():
     RightPanel_RightvBox.AddStretchSpacer()
     RightPanel_RightvBox.AddSpacer(10)
 
+    Debug_RowCount = 0
+    DebugPanel_DebugView = wx.ListCtrl(MainWindow_DebugPanel,wx.ID_ANY,size=PANEL['DEBUG']['SIZE'],style=wx.LC_REPORT,name="DebugView")
+    DebugPanel_DebugView.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,50)
+    DebugPanel_DebugView.InsertColumn(1,"Time",width=140)
+    DebugPanel_DebugView.InsertColumn(2,"Source",width=70)
+    DebugPanel_DebugView.InsertColumn(3,"Message",width=500)
+    if(PATH_PREFIX):
+        DebugPanel_DebugView.Append(["INFO",GetDateTime(),"Main","Boot from: " + PATH_PREFIX])
+        DebugPanel_DebugView.SetItemTextColour(Debug_RowCount,wx.Colour(COLOR['DEBUG']['INFO']['FG']))
+        Debug_RowCount += 1
+    DebugPanel_DebugView.Append(["WARN",GetDateTime(),"Main","Test Msg."])
+    DebugPanel_DebugView.SetItemTextColour(Debug_RowCount,wx.Colour(COLOR['DEBUG']['WARN']['FG']))
+    Debug_RowCount += 1
+    DebugPanel_DebugView.Append(["ERR",GetDateTime(),"Main","Test Msg."])
+    DebugPanel_DebugView.SetItemTextColour(Debug_RowCount,wx.Colour(COLOR['DEBUG']['ERR']['FG']))
+    Debug_RowCount += 1
+    DebugPanel_DebugView.Append(["SUCC",GetDateTime(),"Main","Test Msg."])
+    DebugPanel_DebugView.SetItemTextColour(Debug_RowCount,wx.Colour(COLOR['DEBUG']['SUCC']['FG']))
+    Debug_RowCount += 1
+    DebugPanel_DebugvBox.Add(DebugPanel_DebugView,1,wx.EXPAND|wx.ALL,15)
+
+
     StatusText = wx.StaticText(MainWindow_StatusPanel,wx.ID_ANY,"Ready.")
     StatusText.SetFont(wx.Font(12,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,faceName="SimHei"))
     StatusText.SetForegroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['FG']))
+    StatusText.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:ToggleWindowSize(MainWindow))
     StatusBar_StatushBox.AddSpacer(10)
     StatusBar_StatushBox.Add(StatusText,1,wx.ALIGN_CENTER,4)
 
