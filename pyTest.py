@@ -127,10 +127,10 @@ def OnClickAbout(Parent:wx.Window):
 
 def ToggleWindowSize(Parent:wx.Window):
     if(Parent.GetClientSize()[0] != WINDOW['MAX_SIZE'][0]):
-        print("StatusBar Double Click Event Recived, Expand Workspace!")
+        print("StatusBar: Double Click Event Recived, Expand Workspace!")
         Parent.SetClientSize(WINDOW['MAX_SIZE'])
     else:
-        print("StatusBar Double Click Event Recived, Shrink Workspace!")
+        print("StatusBar: Double Click Event Recived, Shrink Workspace!")
         Parent.SetClientSize(WINDOW['INITIAL_SIZE'])
 
 
@@ -204,9 +204,9 @@ def WinMain():
     STK1_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(330,60),wx.Colour(64,128,80),wx.Colour(255,255,255),"Data 1","Subject 1","SimHei",16,10)
     STK2_1 = ui.Sticker(MainWindow_RightPanel,(0,0),(200,60),wx.Colour(224,128,128),wx.Colour("#FFF"),"Data 2","Subject 2","SimHei",16,10)
     STK2_2 = ui.Sticker(MainWindow_RightPanel,(0,0),(120,60),wx.Colour(128,128,224),wx.Colour("#FFF"),"Data 3","Subject 3","SimHei",16,10)
-    STK1_1.Body.Bind(wx.EVT_RIGHT_UP,lambda Event:pyperclip.copy("Data 1"))
-    STK2_1.Body.Bind(wx.EVT_RIGHT_UP,lambda Event:pyperclip.copy("Data 2"))
-    STK2_2.Body.Bind(wx.EVT_RIGHT_UP,lambda Event:pyperclip.copy("Data 3"))
+    STK1_1.ClickCopyData(wx.EVT_RIGHT_UP)
+    STK2_1.ClickCopyData(wx.EVT_RIGHT_UP)
+    STK2_2.ClickCopyData(wx.EVT_RIGHT_UP)
 
     Stickers = []
     Stickers.append(hBoxLine(STK1_1.Body,Border=5))
@@ -223,11 +223,11 @@ def WinMain():
     DebugPanel_DebugView.SetDateTimeFormat("%Y-%m-%d %H:%M")
     DebugPanel_DebugView.SetTitles({'Urgency':"级别",'DateTime':"时间",'Source':"来源",'Message':"消息"})
     if(PATH_PREFIX):
-        DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Boot from: " + PATH_PREFIX)
-    DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Test Msg.")
-    DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_WARN,"Main","Test Msg.")
-    DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_ERRO,"Main","Test Msg.")
-    DebugPanel_DebugView.Append(ui.ConstDefs.LOGVIEW_URGENCY_SUCC,"Main","Test Msg.")
+        DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Boot from: " + PATH_PREFIX)
+    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Main","Test Msg.")
+    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_WARN,"Main","Test Msg.")
+    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_ERRO,"Main","Test Msg.")
+    DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_SUCC,"Main","Test Msg.")
     DebugPanel_DebugvBox.Add(DebugPanel_DebugView.Body,1,wx.EXPAND|wx.ALL,15)
 
 

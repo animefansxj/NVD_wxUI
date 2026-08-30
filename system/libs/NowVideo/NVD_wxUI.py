@@ -17,6 +17,7 @@ import wx.dataview
 import wx.lib.inspection
 import uuid
 import datetime
+import pyperclip
 from typing import Any
 from enum import Enum
 
@@ -377,7 +378,7 @@ class LogView:
         }
         self.this = 0
 
-    def Append(self,Urgency:int,Source:str,Message:str,Color:bool=True):
+    def Log(self,Urgency:int,Source:str,Message:str,Color:bool=True):
         self.Rows.append(self.Row(self.Body,len(self.Rows),Urgency,Source,Message,self.DateTimeFormat))
         self.this = len(self.Rows)-1
         if(Color):
@@ -422,13 +423,6 @@ class LogView:
         if 'Message' in Width:
             self.Body.SetColumnWidth(3,Width['Message'])
     
-    '''
-    def SetColumnsWidth(self,Width:list):
-        for i in range(self.Body.GetColumnCount()):
-            if(Width[i] > 0):
-                self.Body.SetColumnWidth(i,Width[i])
-    '''
-
 
 class Debug:
     def wxDebug():
@@ -514,6 +508,16 @@ class Sticker:
 
     def GetSize(self) -> wx.Size:
         return self.Body.GetSize()
+
+    def Bind(self,Event:wx.PyEventBinder,Handler:function):
+        self.Body.Bind(Event,Handler)
+        self.Element_Data.Bind(Event,Handler)
+        self.Element_Subject.Bind(Event,Handler)
+
+    def ClickCopyData(self,Event:wx.PyEventBinder):
+        self.Body.Bind(Event,lambda Event:pyperclip.copy(self.Text_Data))
+        self.Element_Data.Bind(Event,lambda Event:pyperclip.copy(self.Text_Data))
+        self.Element_Subject.Bind(Event,lambda Event:pyperclip.copy(self.Text_Data))
 
 
 class AboutDialog:
