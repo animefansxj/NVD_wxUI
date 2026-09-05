@@ -125,12 +125,14 @@ def OnClickAbout(Parent:wx.Window):
         (480,400))
     AboutDialog.Show()
 
-def ToggleWindowSize(Parent:wx.Window):
+def ToggleWindowSize(Parent:wx.Window,LogView:ui.LogView|None=None):
     if(Parent.GetClientSize()[0] != WINDOW['MAX_SIZE'][0]):
-        print("StatusBar: Double Click Event Recived, Expand Workspace!")
+        if(LogView):
+            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar","Double Click Event Recived, Expand Workspace!")
         Parent.SetClientSize(WINDOW['MAX_SIZE'])
     else:
-        print("StatusBar: Double Click Event Recived, Shrink Workspace!")
+        if(LogView):
+            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar","Double Click Event Recived, Shrink Workspace!")
         Parent.SetClientSize(WINDOW['INITIAL_SIZE'])
 
 
@@ -168,12 +170,10 @@ def WinMain():
     MainWindow_MainPanel = wx.Panel(MainWindow)
     MainWindow_LeftPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['LEFT']['POS'],PANEL['LEFT']['SIZE'])
     MainWindow_RightPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['RIGHT']['POS'],PANEL['RIGHT']['SIZE'])
-    MainWindow_StatusPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['STATUS_BAR']['POS'],PANEL['STATUS_BAR']['SIZE'])
     MainWindow_DebugPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['DEBUG']['POS'],PANEL['DEBUG']['SIZE'])
     MainWindow_MainvBox = wx.BoxSizer(wx.VERTICAL)
     MainvBox_ContenthBox = wx.BoxSizer(wx.HORIZONTAL)
     MainWindow_MainvBox.Add(MainvBox_ContenthBox,0,wx.EXPAND|wx.ALL)
-    MainWindow_MainvBox.Add(MainWindow_StatusPanel,0,wx.EXPAND|wx.ALL)
     MainvBox_ContenthBox.Add(MainWindow_LeftPanel,0,wx.EXPAND|wx.ALL)
     MainvBox_ContenthBox.Add(MainWindow_RightPanel,0,wx.EXPAND|wx.ALL)
     MainvBox_ContenthBox.Add(MainWindow_DebugPanel,0,wx.EXPAND|wx.ALL)
@@ -184,11 +184,6 @@ def WinMain():
     MainWindow_LeftPanel.SetSizer(LeftPanel_LeftvBox)
     MainWindow_RightPanel.SetSizer(RightPanel_RightvBox)
     MainWindow_DebugPanel.SetSizer(DebugPanel_DebugvBox)
-    StatusBar_StatushBox = wx.BoxSizer(wx.HORIZONTAL)
-    MainWindow_StatusPanel.SetSizer(StatusBar_StatushBox)
-    MainWindow_StatusPanel.SetForegroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['FG']))
-    MainWindow_StatusPanel.SetBackgroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['BG']))
-    MainWindow_StatusPanel.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:ToggleWindowSize(MainWindow))
 
     DebugPanel_DebugView = ui.LogView(MainWindow_DebugPanel,Size=PANEL['DEBUG']['SIZE'])
     DebugPanel_DebugView.SetDateTimeFormat("%Y-%m-%d %H:%M")
@@ -230,17 +225,17 @@ def WinMain():
     RightPanel_RightvBox.AddStretchSpacer()
     RightPanel_RightvBox.AddSpacer(10)
 
-    StatusText = wx.StaticText(MainWindow_StatusPanel,wx.ID_ANY,"Ready.")
-    StatusText.SetFont(wx.Font(12,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,faceName="SimHei"))
-    StatusText.SetForegroundColour(wx.Colour(COLOR['STATUS_BAR']['READY']['FG']))
-    StatusText.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:ToggleWindowSize(MainWindow))
-    StatusBar_StatushBox.AddSpacer(10)
-    StatusBar_StatushBox.Add(StatusText,1,wx.ALIGN_CENTER,4)
+    StatusBar = ui.StatusBar(MainWindow,MainWindow_MainPanel)
+    StatusBar.SetTextFontSize(14)
+    StatusBar.Bind(wx.EVT_RIGHT_DCLICK,lambda Event:(ToggleWindowSize(MainWindow,DebugPanel_DebugView)))
+    StatusBar.SetTexts({'READY':"就绪",'RUNNING':"运行中",'WARNING':"完成, 但存在警告",'FAILED':"失败",'SUCCESSED':"成功"})
+    #StatusBar.SetStatus(ui.ConstDefs.STATUSBAR_STATUS_WARN)
+    MainWindow_MainvBox.Add(StatusBar.Body,0,wx.EXPAND|wx.ALL)
+
 
     MainWindow_LeftPanel.Layout()
     MainWindow_RightPanel.Layout()
     MainWindow_DebugPanel.Layout()
-    MainWindow_StatusPanel.Layout()
     MainWindow_MainPanel.Layout()
 
     # 显示主窗口

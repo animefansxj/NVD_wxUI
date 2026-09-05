@@ -40,12 +40,36 @@ COLOR = {
             'BG': "#FFFFFF",
             'FG': "#00B45A"
         }
+    },
+    'STATUS_BAR': {
+        'RADY': {
+            'BG': "#000000",
+            'FG': "#FFFFFF"
+        },
+        'RUNG': {
+            'BG': "#38C0FF",
+            'FG': "#002B3F"
+        },
+        'WARN': {
+            'BG': "#FFD23D",
+            'FG': "#4A3900"
+        },
+        'FAIL': {
+            'BG': "#FF3737",
+            'FG': "#4C0000"
+        },
+        'SUCC': {
+            'BG': "#3BFF6C",
+            'FG': "#004C13"
+        }
     }
 }
 
 class ConstDefs(Enum):
     # CtrlID
     #  03 -- ListView
+    #  04 -- LogView
+    #  05 -- StatusBar
     # SubID
     #  (ListView) 1 -- Col
     #  (LogView)  1 -- Urgency
@@ -56,6 +80,11 @@ class ConstDefs(Enum):
     LOGVIEW_URGENCY_WARN = 0x0412
     LOGVIEW_URGENCY_ERRO = 0x0413
     LOGVIEW_URGENCY_SUCC = 0x0414
+    STATUSBAR_STATUS_RADY = 0x0511
+    STATUSBAR_STATUS_RUNG = 0x0512
+    STATUSBAR_STATUS_WARN = 0x0513
+    STATUSBAR_STATUS_FAIL = 0x0514
+    STATUSBAR_STATUS_SUCC = 0x0515
 
 
 ########## 暂时不用的代码 ########
@@ -422,7 +451,142 @@ class LogView:
             self.Body.SetColumnWidth(2,Width['Source'])
         if 'Message' in Width:
             self.Body.SetColumnWidth(3,Width['Message'])
-    
+
+class StatusBar:
+    Window: wx.Window
+    Parent: wx.Window
+    Body: wx.Panel
+    Position: wx.Point
+    Size: wx.Size
+    Texts: dict
+    Sizer_Main: wx.BoxSizer
+    Element_Text: wx.StaticText
+    Colors: dict
+    Status: int
+    Font: wx.Font
+    LeftPadding: int
+
+    def __init__(self,Window:wx.Window,Parent:wx.Window,Height:int|None=None):
+        self.Window = Window
+        self.Parent = Parent
+        if(Height):
+            self.Size = wx.Size(self.Window.GetClientSize().Width,Height)
+        else:
+            self.Size = wx.Size(self.Window.GetClientSize().Width,24)
+        self.Position = wx.Point(0,self.Window.GetClientSize().Height - self.Size.Height)
+        self.Colors = {
+            ConstDefs.STATUSBAR_STATUS_RADY: {
+                'BG': COLOR['STATUS_BAR']['RADY']['BG'],
+                'FG': COLOR['STATUS_BAR']['RADY']['FG'],
+            },
+            ConstDefs.STATUSBAR_STATUS_RUNG: {
+                'BG': COLOR['STATUS_BAR']['RUNG']['BG'],
+                'FG': COLOR['STATUS_BAR']['RUNG']['FG'],
+            },
+            ConstDefs.STATUSBAR_STATUS_WARN: {
+                'BG': COLOR['STATUS_BAR']['WARN']['BG'],
+                'FG': COLOR['STATUS_BAR']['WARN']['FG'],
+            },
+            ConstDefs.STATUSBAR_STATUS_FAIL: {
+                'BG': COLOR['STATUS_BAR']['FAIL']['BG'],
+                'FG': COLOR['STATUS_BAR']['FAIL']['FG'],
+            },
+            ConstDefs.STATUSBAR_STATUS_SUCC: {
+                'BG': COLOR['STATUS_BAR']['SUCC']['BG'],
+                'FG': COLOR['STATUS_BAR']['SUCC']['FG'],
+            }
+        }
+        self.Texts = {
+            ConstDefs.STATUSBAR_STATUS_RADY: "Ready",
+            ConstDefs.STATUSBAR_STATUS_RUNG: "Running",
+            ConstDefs.STATUSBAR_STATUS_WARN: "Warning",
+            ConstDefs.STATUSBAR_STATUS_FAIL: "Failed",
+            ConstDefs.STATUSBAR_STATUS_SUCC: "Successed"
+        }
+        self.Status = ConstDefs.STATUSBAR_STATUS_RADY
+        self.LeftPadding = 10
+        self.Font = wx.Font(12,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,faceName="SimHei")
+        self.Body = wx.Panel(self.Parent,wx.ID_ANY,self.Position,self.Size)
+        self.Sizer_Main = wx.BoxSizer(wx.HORIZONTAL)
+        self.Element_Text = wx.StaticText(self.Body,wx.ID_ANY,self.Texts[self.Status])
+        self.Element_Text.SetFont(self.Font)
+        self.Body.SetBackgroundColour(self.Colors[self.Status]['BG'])
+        self.Element_Text.SetForegroundColour(self.Colors[self.Status]['FG'])
+        self.Sizer_Main.AddSpacer(self.LeftPadding)
+        self.Sizer_Main.Add(self.Element_Text,1,wx.ALIGN_CENTER,4)
+        self.Body.SetSizer(self.Sizer_Main)
+        self.Body.Layout()
+
+    # 更新文字及背景
+    def Update(self):
+        self.Element_Text.SetLabel(self.Texts[self.Status])
+        self.Element_Text.SetFont(self.Font)
+        self.Body.SetSize(self.Size)
+        self.Body.SetBackgroundColour(self.Colors[self.Status]['BG'])
+        self.Element_Text.SetForegroundColour(self.Colors[self.Status]['FG'])
+
+    # 变更状态
+    def SetStatus(self,Status:int):
+        Set = False
+        match Status:
+            case ConstDefs.STATUSBAR_STATUS_RADY:
+                self.Status = ConstDefs.STATUSBAR_STATUS_RADY
+                Set = True
+            case ConstDefs.STATUSBAR_STATUS_RUNG:
+                self.Status = ConstDefs.STATUSBAR_STATUS_RUNG
+                Set = True
+            case ConstDefs.STATUSBAR_STATUS_WARN:
+                self.Status = ConstDefs.STATUSBAR_STATUS_WARN
+                Set = True
+            case ConstDefs.STATUSBAR_STATUS_FAIL:
+                self.Status = ConstDefs.STATUSBAR_STATUS_FAIL
+                Set = True
+            case ConstDefs.STATUSBAR_STATUS_SUCC:
+                self.Status = ConstDefs.STATUSBAR_STATUS_SUCC
+                Set = True
+        if(Set):
+            self.Update()
+
+
+    # 设置状态对应的显示文字
+    def SetTexts(self,Texts:dict={'READY':"Ready",'RUNNING':"Running",'WARNING':"Warning",'FAILED':"Failed",'SUCCESSED':"Successed"}):
+        if 'READY' in Texts:
+            self.Texts[ConstDefs.STATUSBAR_STATUS_RADY] = Texts['READY']
+        if 'RUNNING' in Texts:
+            self.Texts[ConstDefs.STATUSBAR_STATUS_RUNG] = Texts['RUNNING']
+        if 'WARNING' in Texts:
+            self.Texts[ConstDefs.STATUSBAR_STATUS_WARN] = Texts['WARNING']
+        if 'FAILED' in Texts:
+            self.Texts[ConstDefs.STATUSBAR_STATUS_FAIL] = Texts['FAILED']
+        if 'SUCCESSED' in Texts:
+            self.Texts[ConstDefs.STATUSBAR_STATUS_SUCC] = Texts['SUCCESSED']
+        self.Update()
+
+
+    def SetColors(self,Status:int,FGColor:str|None=None,BGColor:str|None=None):
+        if Status in ConstDefs:
+            if(FGColor):
+                self.Colors[Status]['FG'] = FGColor
+            if(BGColor):
+                self.Colors[Status]['BG'] = BGColor
+        self.Update()
+
+
+    def SetTextFontSize(self,FontSize:int):
+        self.Font.SetPointSize(FontSize)
+        self.Size.SetHeight(self.Font.GetPointSize()*2)
+        self.Body.Layout()
+
+
+    def SetTextFontName(self,FontName:str):
+        self.Font.SetFaceName(FontName)
+
+
+    # 绑定事件
+    def Bind(self,Event:wx.PyEventBinder,Handler:function):
+        self.Body.Bind(Event,Handler)
+        self.Element_Text.Bind(Event,Handler)
+
 
 class Debug:
     def wxDebug():
