@@ -1,14 +1,16 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260830B                  #
+#                Rev 20260905A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
-#  This copy of source code was liscensed to    #
-#  the Astemo Group with ** READONLY ** use,    #
-#  And Astemo can use this copy of source code  #
-#  without open it's software's source code.    #
+#  If this source code is subject to a          #
+#  separately negotiated license agreement,     #
+#  copies of the source code shall be governed  #
+#  by the terms of that agreement. Otherwise,   #
+#  it shall be licensed under the default       #
+#  agreement set forth above.                   #
 #################################################
 
 
