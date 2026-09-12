@@ -514,9 +514,9 @@ class StatusBar:
         self.Window = Window
         self.Parent = Parent
         if(Height):
-            self.Size = wx.Size(self.Window.GetClientSize().Width,Height)
+            self.Size = wx.Size(self.Window.GetClientSize().Width,self.Top.FromDIP(Height))
         else:
-            self.Size = wx.Size(self.Window.GetClientSize().Width,24)
+            self.Size = wx.Size(self.Window.GetClientSize().Width,self.Top.FromDIP(24))
         self.Position = wx.Point(0,self.Window.GetClientSize().Height - self.Size.Height)
         self.Colors = {
             ConstDefs.STATUSBAR_STATUS_RADY: {

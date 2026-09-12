@@ -96,9 +96,10 @@ def GetDateTime():
     return str(datetime.datetime.now())[0:-7]
 
 def hBoxLine(wxObj1:wx.Window,wxObj2:wx.Window=None,Border:int|None=None):
+    Top = wxObj1.GetTopLevelParent()
     hBox = wx.BoxSizer(wx.HORIZONTAL)
     if(Border):
-        FinalBroder = Border
+        FinalBroder = Top.FromDIP(Border)
     else:
         FinalBroder = 0
     hBox.Add(wxObj1,1,wx.EXPAND|wx.ALL,FinalBroder)
@@ -205,10 +206,10 @@ def WinMain():
     TableView = ui.ListView(MainWindow_LeftPanel,Size=PANEL['LEFT']['SIZE'])
     TableView.SetCols("Enabled:toggle:60|Name:text:160|Progress:progress:80|Status:text")
     TableView.AppendRow([True,"Name 1",60,"Status 1"],"Row1")
-    LeftPanel_LeftvBox.AddSpacer(10)
+    LeftPanel_LeftvBox.AddSpacer(MainWindow.FromDIP(10))
     LeftPanel_LeftvBox.Add(TableView.Body,1,wx.EXPAND|wx.ALL,15)
     LeftPanel_LeftvBox.AddStretchSpacer()
-    LeftPanel_LeftvBox.AddSpacer(10)
+    LeftPanel_LeftvBox.AddSpacer(MainWindow.FromDIP(10))
     TableView.SetValueByIndex("Modified 1",0,TableView.GetColIndexByName("Status")[0])
     print(TableView.GetColIndexByName("Status"))
     print(TableView.GetRowIndexByValue("Modified 1",TableView.GetColIndexByName("Status")[0]))
@@ -224,11 +225,11 @@ def WinMain():
     Stickers.append(hBoxLine(STK1_1.Body,Border=5))
     Stickers.append(hBoxLine(STK2_1.Body,STK2_2.Body,Border=5))
 
-    RightPanel_RightvBox.AddSpacer(10)
+    RightPanel_RightvBox.AddSpacer(MainWindow.FromDIP(10))
     for line in Stickers:
         RightPanel_RightvBox.Add(line)
     RightPanel_RightvBox.AddStretchSpacer()
-    RightPanel_RightvBox.AddSpacer(10)
+    RightPanel_RightvBox.AddSpacer(MainWindow.FromDIP(10))
 
     StatusBar = ui.StatusBar(MainWindow,MainWindow_MainPanel)
     StatusBar.SetTextFontSize(14)
