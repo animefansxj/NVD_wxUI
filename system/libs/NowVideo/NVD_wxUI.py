@@ -172,6 +172,7 @@ class ListView:
     #        self.Value = CellValue
 
     class Col:
+        Top: wx.Window
         UUID: uuid.UUID
         Index: int
         Name: str
@@ -179,6 +180,7 @@ class ListView:
         Width: int|None
 
         def __init__(self,Parent:wx.dataview.DataViewListCtrl,ColIndex:int,ColName:str,ColType:int,ColWidth:int|None=None):
+            self.Top = Parent.GetTopLevelParent()
             self.UUID = uuid.uuid4()
             self.Index = ColIndex
             self.Name = ColName
@@ -190,11 +192,11 @@ class ListView:
 
             match ColType:
                 case ConstDefs.LISTVIEW_COL_TYPE_TEXT:
-                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewTextRenderer(),ColIndex,self.Width))
+                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewTextRenderer(),ColIndex,self.Top.FromDIP(self.Width)))
                 case ConstDefs.LISTVIEW_COL_TYPE_TOGGLE:
-                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewToggleRenderer(mode=wx.dataview.DATAVIEW_CELL_ACTIVATABLE),ColIndex,self.Width))
+                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewToggleRenderer(mode=wx.dataview.DATAVIEW_CELL_ACTIVATABLE),ColIndex,self.Top.FromDIP(self.Width)))
                 case ConstDefs.LISTVIEW_COL_TYPE_PROGRESS:
-                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewProgressRenderer(),ColIndex,self.Width))  
+                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewProgressRenderer(),ColIndex,self.Top.FromDIP(self.Width)))
 
     class Row:
         Parent: wx.dataview.DataViewListCtrl
@@ -410,10 +412,10 @@ class LogView:
         self.Parent = Parent
         self.Body = wx.ListCtrl(Parent,wx.ID_ANY,size=self.Top.FromDIP(Size),style=wx.LC_REPORT)
         self.DateTimeFormat = DATETIMEFORMAT
-        self.Body.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,50)
-        self.Body.InsertColumn(1,"Time",width=140)
-        self.Body.InsertColumn(2,"Source",width=70)
-        self.Body.InsertColumn(3,"Message",width=500)
+        self.Body.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,width=self.Top.FromDIP(50))
+        self.Body.InsertColumn(1,"Time",width=self.Top.FromDIP(140))
+        self.Body.InsertColumn(2,"Source",width=self.Top.FromDIP(70))
+        self.Body.InsertColumn(3,"Message",width=self.Top.FromDIP(500))
         self.Rows = []
         self.Colors = {
             ConstDefs.LOGVIEW_URGENCY_INFO: {
@@ -484,13 +486,13 @@ class LogView:
 
     def SetColumnsWidth(self,Width:dict={'Urgency':50,'DateTime':140,'Source':70,'Message':500}):
         if 'Urgency' in Width:
-            self.Body.SetColumnWidth(0,Width['Urgency'])
+            self.Body.SetColumnWidth(0,self.Top.FromDIP(Width['Urgency']))
         if 'DateTime' in Width:
-            self.Body.SetColumnWidth(1,Width['DateTime'])
+            self.Body.SetColumnWidth(1,self.Top.FromDIP(Width['DateTime']))
         if 'Source' in Width:
-            self.Body.SetColumnWidth(2,Width['Source'])
+            self.Body.SetColumnWidth(2,self.Top.FromDIP(Width['Source']))
         if 'Message' in Width:
-            self.Body.SetColumnWidth(3,Width['Message'])
+            self.Body.SetColumnWidth(3,self.Top.FromDIP(Width['Message']))
 
 class StatusBar:
     Top: wx.Window
@@ -753,10 +755,8 @@ class AboutDialog:
     Element_ProductDetailContainer: wx.Panel
     Element_ProductDetail: wx.TextCtrl
     Element_ButtonOK: wx.Button
-    Logo_Max_Width: int
-    Logo_Max_Height: int
-    LOGO_MAX_WIDTH_DEF = 256
-    LOGO_MAX_HEIGHT_DEF = 80
+    LOGO_MAX_WIDTH = 256
+    LOGO_MAX_HEIGHT = 80
     BOX_SIZER_MARGIN_STEPPING = 5
     # 若最终显示的TextCtrl高度过大或过小，调整此值
     DETAIL_HEIGHT_OFFSET = -60
@@ -765,8 +765,6 @@ class AboutDialog:
         UsedHeight = 0
         self.Top = Parent.GetTopLevelParent()
         self.Parent = Parent
-        self.Logo_Max_Width = self.Top.FromDIP(self.LOGO_MAX_WIDTH_DEF)
-        self.Logo_Max_Height = self.Top.FromDIP(self.LOGO_MAX_HEIGHT_DEF)
         self.Element_AboutDialog = wx.Dialog(Parent,wx.ID_ANY,Title,size=self.Top.FromDIP(Size))
         self.Element_MainPanel = wx.Panel(self.Element_AboutDialog,wx.ID_ANY)
         self.Container_MainvBox = wx.BoxSizer(wx.VERTICAL)
@@ -823,12 +821,12 @@ class AboutDialog:
                     if(LogoScale):
                         self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*LogoScale),int(self.LogoImage.Height*LogoScale),wx.IMAGE_QUALITY_HIGH)
                     # 判断Logo的高度或宽度是否超出了限制大小
-                    if(((self.LogoImage.Width / self.Logo_Max_Width) > 1) or ((self.LogoImage.Height / self.Logo_Max_Height) > 1)):
+                    if(((self.LogoImage.Width / self.LOGO_MAX_WIDTH) > 1) or ((self.LogoImage.Height / self.LOGO_MAX_HEIGHT) > 1)):
                         # 判断宽度和高度超出限制的比例，若宽度超出更多则通过宽度计算缩放比例，若高度超过更多则通过高度计算错放比例
-                        if((self.LogoImage.GetSize().GetWidth() / self.Logo_Max_Width) > (self.LogoImage.GetSize().GetHeight() / self.Logo_Max_Height)):
-                            ScaleRatio = self.Logo_Max_Width / self.LogoImage.Width
+                        if((self.LogoImage.GetSize().GetWidth() / self.LOGO_MAX_WIDTH) > (self.LogoImage.GetSize().GetHeight() / self.LOGO_MAX_HEIGHT)):
+                            ScaleRatio = self.LOGO_MAX_WIDTH / self.LogoImage.Width
                         else:
-                            ScaleRatio = self.Logo_Max_Height / self.LogoImage.Height
+                            ScaleRatio = self.LOGO_MAX_HEIGHT / self.LogoImage.Height
                     self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*ScaleRatio),int(self.LogoImage.Height*ScaleRatio),wx.IMAGE_QUALITY_HIGH)
                     self.Logo = wx.StaticBitmap(self.Element_MainPanel,wx.ID_ANY,self.LogoImage)
                     self.Container_NamehBox.Add(self.Logo,3,wx.ALIGN_CENTER)

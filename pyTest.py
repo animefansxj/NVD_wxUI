@@ -1,6 +1,9 @@
+import sys
+if(sys.platform == "win32"):
+    import ctypes
+    ctypes.OleDLL("shcore").SetProcessDpiAwareness(2)
 import wx
 import wx.dataview
-import sys
 import pyperclip
 import datetime
 import system.libs.NowVideo.NVD_wxUI as ui
@@ -106,6 +109,7 @@ def hBoxLine(wxObj1:wx.Window,wxObj2:wx.Window=None,Border:int|None=None):
 
 ########## Event Handlers ##########
 def OnClickExit():
+    wx.GetApp().ExitMainLoop()
     exit(0)
 
 def OnClickWxDebug():
@@ -114,7 +118,8 @@ def OnClickWxDebug():
 def OnClickAbout(Parent:wx.Window):
 
     AboutDialog = ui.AboutDialog(
-        Parent,"About this App...",
+        Parent,
+        "About this App...",
         "system/medias/images/AboutLogo.png",
         None,
         "NVDTEST",
@@ -126,14 +131,14 @@ def OnClickAbout(Parent:wx.Window):
     AboutDialog.Show()
 
 def ToggleWindowSize(Parent:wx.Window,LogView:ui.LogView|None=None):
-    if(Parent.GetClientSize()[0] != WINDOW['MAX_SIZE'][0]):
+    if(Parent.GetClientSize()[0] != Parent.FromDIP(WINDOW['MAX_SIZE'][0])):
         if(LogView):
-            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar","Double Click Event Recived, Expand Workspace!")
-        Parent.SetClientSize(WINDOW['MAX_SIZE'])
+            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar",f"Double Click Event Recived, Expand Workspace to Width:{Parent.FromDIP(WINDOW['MAX_SIZE'][0])}!")
+        Parent.SetClientSize(Parent.FromDIP(WINDOW['MAX_SIZE']))
     else:
         if(LogView):
-            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar","Double Click Event Recived, Shrink Workspace!")
-        Parent.SetClientSize(WINDOW['INITIAL_SIZE'])
+            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar",f"Double Click Event Recived, Shrink Workspace to Width:{Parent.FromDIP(WINDOW['INITIAL_SIZE'][0])}!")
+        Parent.SetClientSize(Parent.FromDIP(WINDOW['INITIAL_SIZE']))
 
 
 ########## Main Window ###########
@@ -153,9 +158,9 @@ def WinMain():
     HelpMenu_About = HelpMenu.Append(wx.ID_ABOUT,"&About")
     MainWindow.SetMenuBar(MainMenu)
 
-    MainWindow.SetMinClientSize(WINDOW['INITIAL_SIZE'])
-    MainWindow.SetMaxClientSize(WINDOW['MAX_SIZE'])
-    MainWindow.SetClientSize(WINDOW['INITIAL_SIZE'])
+    MainWindow.SetMinClientSize(MainWindow.FromDIP(WINDOW['INITIAL_SIZE']))
+    MainWindow.SetMaxClientSize(MainWindow.FromDIP(WINDOW['MAX_SIZE']))
+    MainWindow.SetClientSize(MainWindow.FromDIP(WINDOW['INITIAL_SIZE']))
     
     MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickExit(),FileMenu_Exit)
     MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickAbout(MainWindow),HelpMenu_About)
@@ -168,9 +173,9 @@ def WinMain():
     MainWindow.Update()
 
     MainWindow_MainPanel = wx.Panel(MainWindow)
-    MainWindow_LeftPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['LEFT']['POS'],PANEL['LEFT']['SIZE'])
-    MainWindow_RightPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['RIGHT']['POS'],PANEL['RIGHT']['SIZE'])
-    MainWindow_DebugPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['DEBUG']['POS'],PANEL['DEBUG']['SIZE'])
+    MainWindow_LeftPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['LEFT']['POS'],MainWindow.FromDIP(PANEL['LEFT']['SIZE']))
+    MainWindow_RightPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['RIGHT']['POS'],MainWindow.FromDIP(PANEL['RIGHT']['SIZE']))
+    MainWindow_DebugPanel = wx.Panel(MainWindow_MainPanel,wx.ID_ANY,PANEL['DEBUG']['POS'],MainWindow.FromDIP(PANEL['DEBUG']['SIZE']))
     MainWindow_MainvBox = wx.BoxSizer(wx.VERTICAL)
     MainvBox_ContenthBox = wx.BoxSizer(wx.HORIZONTAL)
     MainWindow_MainvBox.Add(MainvBox_ContenthBox,0,wx.EXPAND|wx.ALL)
