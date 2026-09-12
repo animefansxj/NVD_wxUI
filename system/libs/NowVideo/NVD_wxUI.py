@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260905A                  #
+#                Rev 20260912A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -41,6 +41,10 @@ COLOR = {
         'SUCC': {
             'BG': "#FFFFFF",
             'FG': "#00B45A"
+        },
+        'DEBG': {
+            'BG': "#FFFFFF",
+            'FG': "#8A4300"
         }
     },
     'STATUS_BAR': {
@@ -82,6 +86,7 @@ class ConstDefs(Enum):
     LOGVIEW_URGENCY_WARN = 0x0412
     LOGVIEW_URGENCY_ERRO = 0x0413
     LOGVIEW_URGENCY_SUCC = 0x0414
+    LOGVIEW_URGENCY_DEBG = 0x0415
     STATUSBAR_STATUS_RADY = 0x0511
     STATUSBAR_STATUS_RUNG = 0x0512
     STATUSBAR_STATUS_WARN = 0x0513
@@ -226,7 +231,8 @@ class ListView:
                     return True
             return False
 
-    
+    Top: wx.Window
+    Parent: wx.Window
     Cols: list[Col]
     Rows: list[Row]
     # this: last appended of modified row and col index [rowIndex,colIndex]
@@ -234,7 +240,9 @@ class ListView:
     Body: wx.dataview.DataViewListCtrl
 
     def __init__(self,Parent:wx.Window,Position:wx.Point=wx.DefaultPosition,Size:wx.Size=wx.DefaultSize):
-        self.Body = wx.dataview.DataViewListCtrl(Parent,size=Size,style=wx.dataview.DV_ROW_LINES)
+        self.Top = Parent.GetTopLevelParent()
+        self.Parent = Parent
+        self.Body = wx.dataview.DataViewListCtrl(Parent,size=self.Top.FromDIP(Size),style=wx.dataview.DV_ROW_LINES)
         self.Cols = []
         self.Rows = []
         self.this = [0,0]
@@ -351,15 +359,16 @@ class LogView:
         DateTime: datetime.datetime
         Source: str
         Message: str
+        Continued: bool
 
-        def __init__(self,Parent:wx.ListCtrl,RowIndex:int,Urgency:int,Source:str,Message:str,DateTimeFormat):
+        def __init__(self,Parent:wx.ListCtrl,RowIndex:int,Urgency:int,Source:str|None,Message:str,DateTimeFormat:str,MessageOnly:bool=False):
             self.Parent = Parent
             self.UUID = uuid.uuid4()
             self.Index = RowIndex
             self.Urgency = Urgency
             self.DateTime = datetime.datetime.now()
-            self.Source = Source
             self.Message = Message
+
             match(self.Urgency):
                 case ConstDefs.LOGVIEW_URGENCY_WARN:
                     self.Type = "WARN"
@@ -367,14 +376,29 @@ class LogView:
                     self.Type = "ERRO"
                 case ConstDefs.LOGVIEW_URGENCY_SUCC:
                     self.Type = "SUCC"
+                case ConstDefs.LOGVIEW_URGENCY_DEBG:
+                    self.Type = "DEBG"
                 case _:
                     self.Type = "INFO"
-            self.Parent.Append([self.Type,self.DateTime.strftime(DateTimeFormat),self.Source,self.Message])
+            
+            if((not MessageOnly) and (not Source)):
+                self.Source = "Unknow"
+            else:
+                self.Source = Source
+
+            if(MessageOnly):
+                self.Continued = True
+                self.Parent.Append(['','','',self.Message])
+            else:
+                self.Continued = False
+                self.Parent.Append([self.Type,self.DateTime.strftime(DateTimeFormat),self.Source,self.Message])
 
         def Color(self,Colors:dict):
             self.Parent.SetItemTextColour(self.Index,wx.Colour(Colors['FG']))
             self.Parent.SetItemBackgroundColour(self.Index,wx.Colour(Colors['BG']))
 
+    Top: wx.Window
+    Parent: wx.Window
     DateTimeFormat: str
     Rows: list[Row]
     this: int
@@ -382,7 +406,9 @@ class LogView:
     Colors: dict
 
     def __init__(self,Parent:wx.Window,Position:wx.Point=wx.DefaultPosition,Size:wx.Size=wx.DefaultSize):
-        self.Body = wx.ListCtrl(Parent,wx.ID_ANY,size=Size,style=wx.LC_REPORT)
+        self.Top = Parent.GetTopLevelParent()
+        self.Parent = Parent
+        self.Body = wx.ListCtrl(Parent,wx.ID_ANY,size=self.Top.FromDIP(Size),style=wx.LC_REPORT)
         self.DateTimeFormat = DATETIMEFORMAT
         self.Body.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,50)
         self.Body.InsertColumn(1,"Time",width=140)
@@ -405,10 +431,15 @@ class LogView:
             ConstDefs.LOGVIEW_URGENCY_SUCC: {
                 'BG': COLOR['LOG']['SUCC']['BG'],
                 'FG': COLOR['LOG']['SUCC']['FG']
-            }
+            },
+            ConstDefs.LOGVIEW_URGENCY_DEBG: {
+                'BG': COLOR['LOG']['DEBG']['BG'],
+                'FG': COLOR['LOG']['DEBG']['FG']
+                }
         }
         self.this = 0
 
+    # 追加带有优先级,日期,来源的日志信息
     def Log(self,Urgency:int,Source:str,Message:str,Color:bool=True):
         self.Rows.append(self.Row(self.Body,len(self.Rows),Urgency,Source,Message,self.DateTimeFormat))
         self.this = len(self.Rows)-1
@@ -416,8 +447,15 @@ class LogView:
             if Urgency in ConstDefs:
                 self.Rows[self.this].Color(self.Colors[Urgency])
 
+    # 在上一条日志下方追加相同色彩,无优先级,日期和来源的日志信息
+    def Append(self,Message:str,Color:bool=True):
+        self.Rows.append(self.Row(self.Body,len(self.Rows),self.Rows[self.this].Urgency,None,Message,self.DateTimeFormat,True))
+        self.this = len(self.Rows)-1
+        if(Color):
+            self.Rows[self.this].Color(self.Colors[self.Rows[self.this].Urgency])
+
     def SetColors(self,Urgency:int,FGColor:str|None=None,BGColor:str|None=None):
-        if Urgency in ConstDefs:
+        if(Urgency in ConstDefs):
             if(FGColor):
                 self.Colors[Urgency]['FG'] = FGColor
             if(BGColor):
@@ -455,6 +493,7 @@ class LogView:
             self.Body.SetColumnWidth(3,Width['Message'])
 
 class StatusBar:
+    Top: wx.Window
     Window: wx.Window
     Parent: wx.Window
     Body: wx.Panel
@@ -469,6 +508,7 @@ class StatusBar:
     LeftPadding: int
 
     def __init__(self,Window:wx.Window,Parent:wx.Window,Height:int|None=None):
+        self.Top = Parent.GetTopLevelParent()
         self.Window = Window
         self.Parent = Parent
         if(Height):
@@ -508,14 +548,14 @@ class StatusBar:
         self.Status = ConstDefs.STATUSBAR_STATUS_RADY
         self.LeftPadding = 10
         self.Font = wx.Font(12,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,faceName="SimHei")
-        self.Body = wx.Panel(self.Parent,wx.ID_ANY,self.Position,self.Size)
+        self.Body = wx.Panel(self.Parent,wx.ID_ANY,self.Position,self.Top.FromDIP(self.Size))
         self.Sizer_Main = wx.BoxSizer(wx.HORIZONTAL)
         self.Element_Text = wx.StaticText(self.Body,wx.ID_ANY,self.Texts[self.Status])
         self.Element_Text.SetFont(self.Font)
         self.Body.SetBackgroundColour(self.Colors[self.Status]['BG'])
         self.Element_Text.SetForegroundColour(self.Colors[self.Status]['FG'])
-        self.Sizer_Main.AddSpacer(self.LeftPadding)
-        self.Sizer_Main.Add(self.Element_Text,1,wx.ALIGN_CENTER,4)
+        self.Sizer_Main.AddSpacer(self.Top.FromDIP(self.LeftPadding))
+        self.Sizer_Main.Add(self.Element_Text,1,wx.ALIGN_CENTER,self.Top.FromDIP(4))
         self.Body.SetSizer(self.Sizer_Main)
         self.Body.Layout()
 
@@ -523,7 +563,7 @@ class StatusBar:
     def Update(self):
         self.Element_Text.SetLabel(self.Texts[self.Status])
         self.Element_Text.SetFont(self.Font)
-        self.Body.SetSize(self.Size)
+        self.Body.SetSize(self.Top.FromDIP(self.Size))
         self.Body.SetBackgroundColour(self.Colors[self.Status]['BG'])
         self.Element_Text.SetForegroundColour(self.Colors[self.Status]['FG'])
 
@@ -596,6 +636,7 @@ class Debug:
 
 
 class Sticker:
+    Top: wx.Window
     Body: wx.Panel
     Element_vBox: wx.BoxSizer
     Element_Data: wx.StaticText
@@ -606,7 +647,7 @@ class Sticker:
     Font_Subject: wx.Font
 
 #生成仪表盘中的单个含背景色的贴条
-    def __init__(self,ParentPanel:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,FontColor:wx.Colour,Data:str|None=None,Subject:str|None=None,FontName:str="Tahoma",MainFontSize:int=16,HitsFontSize:int=10):
+    def __init__(self,Parent:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,FontColor:wx.Colour,Data:str|None=None,Subject:str|None=None,FontName:str="Tahoma",MainFontSize:int=16,HitsFontSize:int=10):
         if(Data):
             self.Text_Data = Data
         else:
@@ -615,8 +656,9 @@ class Sticker:
             self.Text_Subject = Subject
         else:
             self.Text_Subject = " "
-        
-        self.Body = wx.Panel(ParentPanel,wx.ID_ANY,Position,Size)
+
+        self.Top = Parent.GetTopLevelParent()
+        self.Body = wx.Panel(Parent,wx.ID_ANY,Position,self.Top.FromDIP(Size))
         self.Body.SetBackgroundColour(wx.Colour(BGColor))
         
         self.Font_Data = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
@@ -670,7 +712,7 @@ class Sticker:
         self.Body.SetPosition(Pos)
 
     def Scale(self,Size:wx.Size) -> None:
-        self.Body.SetSize(Size)
+        self.Body.SetSize(self.Top.FromDIP(Size))
 
     def GetSize(self) -> wx.Size:
         return self.Body.GetSize()
@@ -692,6 +734,8 @@ class Sticker:
 
 
 class AboutDialog:
+    Top: wx.Window
+    Parent: wx.Window
     Element_AboutDialog: wx.Dialog
     Element_MainPanel: wx.Panel
     Container_MainvBox: wx.BoxSizer
@@ -709,15 +753,21 @@ class AboutDialog:
     Element_ProductDetailContainer: wx.Panel
     Element_ProductDetail: wx.TextCtrl
     Element_ButtonOK: wx.Button
-    LOGO_MAX_WIDTH = 256
-    LOGO_MAX_HEIGHT = 80
+    Logo_Max_Width: int
+    Logo_Max_Height: int
+    LOGO_MAX_WIDTH_DEF = 256
+    LOGO_MAX_HEIGHT_DEF = 80
     BOX_SIZER_MARGIN_STEPPING = 5
     # 若最终显示的TextCtrl高度过大或过小，调整此值
     DETAIL_HEIGHT_OFFSET = -60
     
     def __init__(self,Parent:wx.Window,Title:str,LogoPath:str|None,LogoScale:float|None,ProductName:str,ProductSubtitle:str,ProductVersion:str,ProductCopyright:str,ProductDetail:str,Size:wx.Size):
         UsedHeight = 0
-        self.Element_AboutDialog = wx.Dialog(Parent,wx.ID_ANY,Title,size=Size)
+        self.Top = Parent.GetTopLevelParent()
+        self.Parent = Parent
+        self.Logo_Max_Width = self.Top.FromDIP(self.LOGO_MAX_WIDTH_DEF)
+        self.Logo_Max_Height = self.Top.FromDIP(self.LOGO_MAX_HEIGHT_DEF)
+        self.Element_AboutDialog = wx.Dialog(Parent,wx.ID_ANY,Title,size=self.Top.FromDIP(Size))
         self.Element_MainPanel = wx.Panel(self.Element_AboutDialog,wx.ID_ANY)
         self.Container_MainvBox = wx.BoxSizer(wx.VERTICAL)
         self.Container_NamehBox = wx.BoxSizer(wx.HORIZONTAL)
@@ -745,8 +795,6 @@ class AboutDialog:
         self.Element_ProductCopyright = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductCopyright)
         self.Element_ProductDetailContainer = wx.Panel(self.Element_MainPanel,wx.ID_ANY)
         self.Element_ProductDetail = wx.TextCtrl(self.Element_ProductDetailContainer,wx.ID_ANY,ProductDetail,style=wx.TE_MULTILINE|wx.TE_READONLY|wx.BORDER_NONE)
-        #self.Element_ProductDetailContainer = wx.Panel(self.Element_MainPanel,wx.ID_ANY,size=(int(Size[0]-62),int(Size[0]/2)+2))
-        #self.Element_ProductDetail = wx.TextCtrl(self.Element_ProductDetailContainer,wx.ID_ANY,ProductDetail,pos=(1,1),size=(int(Size[0]-64),int(Size[0]/2)),style=wx.TE_MULTILINE|wx.TE_READONLY|wx.BORDER_NONE)
         self.Element_ButtonOK = wx.Button(self.Element_MainPanel,wx.ID_ANY,"&OK")
 
         self.Element_ProductName.SetForegroundColour("#880000")
@@ -775,12 +823,12 @@ class AboutDialog:
                     if(LogoScale):
                         self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*LogoScale),int(self.LogoImage.Height*LogoScale),wx.IMAGE_QUALITY_HIGH)
                     # 判断Logo的高度或宽度是否超出了限制大小
-                    if(((self.LogoImage.Width / self.LOGO_MAX_WIDTH) > 1) or ((self.LogoImage.Height / self.LOGO_MAX_HEIGHT) > 1)):
+                    if(((self.LogoImage.Width / self.Logo_Max_Width) > 1) or ((self.LogoImage.Height / self.Logo_Max_Height) > 1)):
                         # 判断宽度和高度超出限制的比例，若宽度超出更多则通过宽度计算缩放比例，若高度超过更多则通过高度计算错放比例
-                        if((self.LogoImage.GetSize().GetWidth() / self.LOGO_MAX_WIDTH) > (self.LogoImage.GetSize().GetHeight() / self.LOGO_MAX_HEIGHT)):
-                            ScaleRatio = self.LOGO_MAX_WIDTH / self.LogoImage.Width
+                        if((self.LogoImage.GetSize().GetWidth() / self.Logo_Max_Width) > (self.LogoImage.GetSize().GetHeight() / self.Logo_Max_Height)):
+                            ScaleRatio = self.Logo_Max_Width / self.LogoImage.Width
                         else:
-                            ScaleRatio = self.LOGO_MAX_HEIGHT / self.LogoImage.Height
+                            ScaleRatio = self.Logo_Max_Height / self.LogoImage.Height
                     self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*ScaleRatio),int(self.LogoImage.Height*ScaleRatio),wx.IMAGE_QUALITY_HIGH)
                     self.Logo = wx.StaticBitmap(self.Element_MainPanel,wx.ID_ANY,self.LogoImage)
                     self.Container_NamehBox.Add(self.Logo,3,wx.ALIGN_CENTER)
@@ -801,8 +849,8 @@ class AboutDialog:
         self.Container_DetailTextvBox.Add(self.Element_ProductDetail,1,wx.EXPAND|wx.ALL,1)
         # 如果不使用BoxSizer来布局TextCtrl，会导致Panel尺寸改变后TextCtrl无法增加尺寸
         self.Element_ProductDetailContainer.SetSizer(self.Container_DetailTextvBox)
-        self.Element_ProductDetailContainer.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 50 + self.DETAIL_HEIGHT_OFFSET))
-        self.Element_ProductDetail.SetMinSize((int(Size[0]-64),Size[1] - UsedHeight - 52 + self.DETAIL_HEIGHT_OFFSET))
+        self.Element_ProductDetailContainer.SetMinSize(self.Top.FromDIP((int(Size[0]-64),Size[1] - UsedHeight - 50 + self.DETAIL_HEIGHT_OFFSET)))
+        self.Element_ProductDetail.SetMinSize(self.Top.FromDIP((int(Size[0]-64),Size[1] - UsedHeight - 52 + self.DETAIL_HEIGHT_OFFSET)))
 
         self.Container_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
         self.Container_SubtitlehBox.Add(self.Element_ProductSubtitle,1)
