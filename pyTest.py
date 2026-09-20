@@ -6,6 +6,7 @@ import wx
 import wx.dataview
 import pyperclip
 import datetime
+import time
 import system.libs.NowVideo.NVD_wxUI as ui
 import DetailedInfo as D
 
@@ -113,6 +114,24 @@ def OnClickExit():
     wx.GetApp().ExitMainLoop()
     exit(0)
 
+def OnClickCapture(Parent:wx.Window,Filename:str|None=None,LogView:ui.LogView|None=None):
+    if(Filename):
+        ImageFile = Filename
+    else:
+        ImageFile = f"Capture_{GetDateTime().replace(':','').replace(' ','_')}.png"
+    Rect = Parent.GetRect()
+    Position = Rect.GetPosition()
+    Size = Rect.GetSize()
+    ImageFile = ui.SelfCapture(Parent,wx.BITMAP_TYPE_PNG,ImageFile)
+    if(LogView):
+        if(ImageFile):
+            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_DEBG,sys._getframe().f_code.co_name,f"Screenshot toggled, X:{Position.x} Y:{Position.y} W:{Size.Width} H:{Size.Height}")
+            LogView.Append(f"Filename: {ImageFile}")
+        else:
+            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_ERRO,sys._getframe().f_code.co_name,"Unable to save screenshot.")
+    if(ImageFile):
+        wx.MessageBox(f"Screenshot saved as {ImageFile}.","Infomation",wx.OK|wx.ICON_INFORMATION)
+
 def OnClickWxDebug():
     ui.Debug.wxDebug()
 
@@ -134,11 +153,11 @@ def OnClickAbout(Parent:wx.Window):
 def ToggleWindowSize(Parent:wx.Window,LogView:ui.LogView|None=None):
     if(Parent.GetClientSize()[0] != Parent.FromDIP(WINDOW['MAX_SIZE'][0])):
         if(LogView):
-            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar",f"Double Click Event Recived, Expand Workspace to Width:{Parent.FromDIP(WINDOW['MAX_SIZE'][0])}!")
+            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar",f"Double Click Event Recived, Expand Workspace! New width:{Parent.FromDIP(WINDOW['MAX_SIZE'][0])}!")
         Parent.SetClientSize(Parent.FromDIP(WINDOW['MAX_SIZE']))
     else:
         if(LogView):
-            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar",f"Double Click Event Recived, Shrink Workspace to Width:{Parent.FromDIP(WINDOW['INITIAL_SIZE'][0])}!")
+            LogView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"StatusBar",f"Double Click Event Recived, Shrink Workspace! New width:{Parent.FromDIP(WINDOW['INITIAL_SIZE'][0])}!")
         Parent.SetClientSize(Parent.FromDIP(WINDOW['INITIAL_SIZE']))
 
 
@@ -154,19 +173,17 @@ def WinMain():
     HelpMenu = wx.Menu()
     MainMenu.Append(FileMenu,"&File")
     MainMenu.Append(HelpMenu,"&Help")
+    FileMenu_Capture = FileMenu.Append(9011,"S&creenshot")
+    FileMenu.AppendSeparator()
     FileMenu_Exit = FileMenu.Append(wx.ID_EXIT,"&Exit")
     HelpMenu_wxDebug = HelpMenu.Append(9051,"wxDebug")
+    HelpMenu.AppendSeparator()
     HelpMenu_About = HelpMenu.Append(wx.ID_ABOUT,"&About")
     MainWindow.SetMenuBar(MainMenu)
 
     MainWindow.SetMinClientSize(MainWindow.FromDIP(WINDOW['INITIAL_SIZE']))
     MainWindow.SetMaxClientSize(MainWindow.FromDIP(WINDOW['MAX_SIZE']))
     MainWindow.SetClientSize(MainWindow.FromDIP(WINDOW['INITIAL_SIZE']))
-    
-    MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickExit(),FileMenu_Exit)
-    MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickAbout(MainWindow),HelpMenu_About)
-    MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickWxDebug(),HelpMenu_wxDebug)
-
 
     # 设置主窗口位置和底色
     MainWindow.Center()
@@ -202,6 +219,10 @@ def WinMain():
     DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_SUCC,"Main","Test Msg.")
     DebugPanel_DebugvBox.Add(DebugPanel_DebugView.Body,1,wx.EXPAND|wx.ALL,15)
 
+    MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickCapture(MainWindow,None,DebugPanel_DebugView),FileMenu_Capture)
+    MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickExit(),FileMenu_Exit)
+    MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickAbout(MainWindow),HelpMenu_About)
+    MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickWxDebug(),HelpMenu_wxDebug)
 
     TableView = ui.ListView(MainWindow_LeftPanel,Size=PANEL['LEFT']['SIZE'])
     TableView.SetCols("Enabled:toggle:60|Name:text:160|Progress:progress:80|Status:text")

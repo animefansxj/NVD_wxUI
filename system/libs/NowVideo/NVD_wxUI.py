@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260912A                  #
+#                Rev 20260920A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -18,7 +18,9 @@ import wx
 import wx.dataview
 import wx.lib.inspection
 import uuid
+import sys
 import datetime
+import time
 import pyperclip
 from typing import Any
 from enum import Enum
@@ -162,6 +164,47 @@ class uiElements:
 #############################################
 #############################################
 #############################################
+def SelfCapture(Parent:wx.Window,ImageFormat:int=wx.BITMAP_TYPE_PNG,Filename:str|None=None):
+    if(Filename):
+        ImageFile = Filename
+        Format = ImageFormat
+    else:
+        FileDialog = wx.FileDialog(Parent,"Save File",wildcard="Bitmap(*.bmp)|*.bmp|PNG Image(*.png)|*.png|Webp Image(*.webp)|*.webp|JPEG Image(*.jpg)|*.jpg",style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)
+        if(FileDialog.ShowModal() == wx.ID_CANCEL):
+            return None
+        ImageFile = FileDialog.GetPath()
+        Extension = ImageFile[ImageFile.rfind('.')+1:]
+        match(Extension.lower()):
+            case "bmp":
+                Format = wx.BITMAP_TYPE_BMP
+            case "png":
+                Format = wx.BITMAP_TYPE_PNG
+            case "webp":
+                Format = wx.BITMAP_TYPE_WEBP
+            case "jpg":
+                Format = wx.BITMAP_TYPE_JPEG
+            case "jpeg":
+                Format = wx.BITMAP_TYPE_JPEG
+            case _:
+                Format = ImageFormat
+
+    Rect = Parent.GetRect()
+    Position = Rect.GetPosition()
+    Size = Rect.GetSize()
+    Image = wx.Bitmap(Size.Width,Size.Height)
+    sDC = wx.ScreenDC()
+    mDC = wx.MemoryDC()
+    time.sleep(0.5)
+    mDC.SelectObject(Image)
+    mDC.Blit(0,0,Size.Width,Size.Height,sDC,Position.x,Position.y)
+    mDC.SelectObject(wx.NullBitmap)
+    try:
+        Image.ConvertToImage().SaveFile(ImageFile,Format)
+        return ImageFile
+    except:
+        print(f"[X] {sys._getframe().f_code.co_name}: Unable to save file: {ImageFile}")
+        return None
+
 class ListView:
     #class Cell:
     #    Name: str|None
