@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260920A                  #
+#                Rev 20260925A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -686,13 +686,14 @@ class Sticker:
     Element_vBox: wx.BoxSizer
     Element_Data: wx.StaticText
     Element_Subject: wx.StaticText
-    Text_Data: str
-    Text_Subject: str
+    Text_Data: str|list[str]
+    Text_Subject: str|list[str]
+    Data_Idx: int|None
     Font_Data: wx.Font
     Font_Subject: wx.Font
 
 #生成仪表盘中的单个含背景色的贴条
-    def __init__(self,Parent:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,FontColor:wx.Colour,Data:str|None=None,Subject:str|None=None,FontName:str="Tahoma",MainFontSize:int=16,HitsFontSize:int=10):
+    def __init__(self,Parent:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,FontColor:wx.Colour,Data:str|list[str]|None=None,Subject:str|list[str]|None=None,FontName:str="Tahoma",MainFontSize:int=16,HitsFontSize:int=10):
         if(Data):
             self.Text_Data = Data
         else:
@@ -709,11 +710,23 @@ class Sticker:
         self.Font_Data = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
         self.Font_Subject = wx.Font(HitsFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
 
-        self.Element_Data = wx.StaticText(self.Body,label=self.Text_Data)
+        match(self.Text_Data):
+            case list():
+                self.Element_Data = wx.StaticText(self.Body,label=self.Text_Data[0])
+                self.Data_Idx = 0
+            case _:
+                self.Element_Data = wx.StaticText(self.Body,label=self.Text_Data)
+                self.Data_Idx = None
         self.Element_Data.SetFont(self.Font_Data)
         self.Element_Data.SetForegroundColour(FontColor)
         self.Element_Data.Center()
-        self.Element_Subject = wx.StaticText(self.Body,label=self.Text_Subject)
+        match(self.Text_Subject):
+            case list():
+                self.Element_Subject = wx.StaticText(self.Body,label=self.Text_Subject[0])
+            case _:
+                self.Element_Subject = wx.StaticText(self.Body,label=self.Text_Subject)
+        if(isinstance(self.Text_Data,list)):
+            self.EnableSwap(True)
         self.Element_Subject.SetFont(self.Font_Subject)
         self.Element_Subject.SetForegroundColour(FontColor)
         self.Element_vBox = wx.BoxSizer(wx.VERTICAL)
@@ -736,7 +749,7 @@ class Sticker:
     def GetData(self) -> str:
         return self.Element_Data.GetLabel()
 
-    def SetSubject(self,Text:str|None) -> None:
+    def SetSubject(self,Text:str|None=None) -> None:
         if(Text):
             self.Element_Subject.SetLabel(Text)
         else:
@@ -749,9 +762,22 @@ class Sticker:
         else:
             return self.Element_Subject.GetLabel()
 
-    def SetText(self,Data:str,Subject:str):
-        self.SetData(Data)
-        self.SetSubject(Subject)
+    def SetText(self,Data:str|list,Subject:str|list|None=None):
+        self.Text_Data = Data
+        if(isinstance(self.Text_Data,list)):
+            self.SetData(self.Text_Data[0])
+            self.Data_Idx = 0
+            self.EnableSwap(True)
+        else:
+            self.SetData(Data)
+            self.EnableSwap(False)
+
+        if(Subject):
+            self.Text_Subject = Subject
+            if(isinstance(self.Text_Subject,list)):
+                self.SetSubject(self.Text_Subject[0])
+            else:
+                self.SetSubject(self.Text_Subject)
 
     def Move(self,Pos:wx.Point) -> None:
         self.Body.SetPosition(Pos)
@@ -776,6 +802,31 @@ class Sticker:
         self.Body.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Data),Handler()))
         self.Element_Data.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Data),Handler()))
         self.Element_Subject.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Data),Handler()))
+
+    def Swap(self):
+        if(isinstance(self.Text_Data,list)):
+            if(self.Data_Idx == len(self.Text_Data)-1):
+                self.Data_Idx = 0
+            else:
+                self.Data_Idx += 1
+            self.SetData(self.Text_Data[self.Data_Idx])
+
+            if(isinstance(self.Text_Subject,list)):
+                if(self.Data_Idx < len(self.Text_Subject)):
+                    self.SetSubject(self.Text_Subject[self.Data_Idx])
+                else:
+                    self.SetSubject()
+
+    def EnableSwap(self,Enable:bool) -> bool:
+        if(Enable):
+            if(isinstance(self.Text_Data,list)):
+                self.Element_Data.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
+                self.Element_Subject.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
+                return(True)
+        else:
+            self.Element_Data.Unbind(wx.EVT_LEFT_UP)
+            self.Element_Subject.Unbind(wx.EVT_LEFT_UP)
+            return(False)
 
 
 class AboutDialog:
