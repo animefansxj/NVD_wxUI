@@ -75,7 +75,7 @@ COLOR = {
 
 SVG = {
     'REFRESH': '''
-        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
             <defs>
                 <mask id="cut-mask">
                 <rect x="0" y="0" width="128" height="128" fill="#FFFFFF" />
@@ -83,9 +83,14 @@ SVG = {
                 </mask>
             </defs>
 
-            <circle cx="64" cy="64" r="52" fill="none" stroke="#{COLOR}" stroke-width="16" mask="url(#cut-mask)" />
-            <polygon points="30,102 58,102 46,127" fill="#{COLOR}" stroke="none" stroke-width="1" />
-            <polygon points="98,26 70,26 82,1" fill="#{COLOR}" stroke="none" stroke-width="1" />
+            <circle cx="64" cy="64" r="52" fill="none" stroke="{COLOR}" stroke-width="16" mask="url(#cut-mask)" />
+            <polygon points="30,102 58,102 46,127" fill="{COLOR}" stroke="none" stroke-width="1" />
+            <polygon points="98,26 70,26 82,1" fill="{COLOR}" stroke="none" stroke-width="1" />
+        </svg>
+    ''',
+    'POINT': '''
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+            <circle cx="8" cy="8" r="8" fill="{COLOR}" />
         </svg>
     '''
 }
@@ -669,8 +674,8 @@ class Sticker:
             self.Body,
             wx.ID_ANY,
             wx.BitmapBundle.FromSVG(
-                SVG['REFRESH'].replace("{COLOR}",f"{((int(f"0x{self.__BGColor.GetAsString(wx.C2S_HTML_SYNTAX)[1:]}",16))^0xFFFFFF):06X}").encode("utf-8"),
-                self.__Top.FromDIP((16,16))
+                SVG['POINT'].replace("{COLOR}",f"#{((int(f"0x{self.__BGColor.GetAsString(wx.C2S_HTML_SYNTAX)[1:]}",16))^0xFFFFFF):06X}").encode("utf-8"),
+                self.__Top.FromDIP((6,6))
             )
         )
         self.Font_Data = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
@@ -696,7 +701,7 @@ class Sticker:
             self.EnableSwap(True)
         self.Element_Subject.SetFont(self.Font_Subject)
         self.Element_Subject.SetForegroundColour(FontColor)
-        self.vBox_Main.Add(self.Element_SwapSign,0,wx.ALIGN_RIGHT|wx.RIGHT|wx.TOP,4)
+        self.vBox_Main.Add(self.Element_SwapSign,0,wx.ALIGN_RIGHT|wx.RIGHT|wx.TOP,8)
         self.vBox_Main.AddStretchSpacer(1)
         self.vBox_Main.Add(self.Element_Subject,0,wx.LEFT|wx.BOTTOM,4)
         self.Body.SetSizer(self.vBox_Main)
