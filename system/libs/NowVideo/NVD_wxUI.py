@@ -73,6 +73,23 @@ COLOR = {
     }
 }
 
+SVG = {
+    'REFRESH': '''
+        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+            <defs>
+                <mask id="cut-mask">
+                <rect x="0" y="0" width="128" height="128" fill="#FFFFFF" />
+                <rect x="-64" y="40" width="256" height="48" fill="#000000" transform="rotate(-45 64 64)" />
+                </mask>
+            </defs>
+
+            <circle cx="64" cy="64" r="52" fill="none" stroke="#{COLOR}" stroke-width="16" mask="url(#cut-mask)" />
+            <polygon points="30,102 58,102 46,127" fill="#{COLOR}" stroke="none" stroke-width="1" />
+            <polygon points="98,26 70,26 82,1" fill="#{COLOR}" stroke="none" stroke-width="1" />
+        </svg>
+    '''
+}
+
 class ConstDefs(Enum):
     # CtrlID
     #  03 -- ListView
@@ -617,8 +634,10 @@ class Debug:
 class Sticker:
     __Top: wx.Window
     __Parent: wx.Window
+    __BGColor: wx.Colour
     Body: wx.Panel
-    Element_vBox: wx.BoxSizer
+    vBox_Main: wx.BoxSizer
+    Element_SwapSign: wx.StaticBitmap
     Element_Data: wx.StaticText
     Element_Subject: wx.StaticText
     Text_Data: str|list[str]
@@ -640,9 +659,20 @@ class Sticker:
 
         self.__Top = Parent.GetTopLevelParent()
         self.__Parent = Parent
+        self.__BGColor = BGColor
         self.Body = wx.Panel(self.__Parent,wx.ID_ANY,Position,self.__Top.FromDIP(Size))
         self.Body.SetBackgroundColour(wx.Colour(BGColor))
-        
+        self.vBox_Main = wx.BoxSizer(wx.VERTICAL)
+
+        #self.Element_SwapSign = wx.StaticBitmap(self.Body,wx.ID_ANY,wx.Image(cairosvg.svg2png(SVG['REFRESH'].encode("utf-8"),output_width=self.__Top.FromDIP(16),output_height=self.__Top.FromDIP(16))))
+        self.Element_SwapSign = wx.StaticBitmap(
+            self.Body,
+            wx.ID_ANY,
+            wx.BitmapBundle.FromSVG(
+                SVG['REFRESH'].replace("{COLOR}",f"{((int(f"0x{self.__BGColor.GetAsString(wx.C2S_HTML_SYNTAX)[1:]}",16))^0xFFFFFF):06X}").encode("utf-8"),
+                self.__Top.FromDIP((16,16))
+            )
+        )
         self.Font_Data = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
         self.Font_Subject = wx.Font(HitsFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
 
@@ -653,6 +683,7 @@ class Sticker:
             case _:
                 self.Element_Data = wx.StaticText(self.Body,label=self.Text_Data)
                 self.Data_Idx = None
+                self.Element_SwapSign.Hide()
         self.Element_Data.SetFont(self.Font_Data)
         self.Element_Data.SetForegroundColour(FontColor)
         self.Element_Data.Center()
@@ -665,10 +696,10 @@ class Sticker:
             self.EnableSwap(True)
         self.Element_Subject.SetFont(self.Font_Subject)
         self.Element_Subject.SetForegroundColour(FontColor)
-        self.Element_vBox = wx.BoxSizer(wx.VERTICAL)
-        self.Element_vBox.AddStretchSpacer(1)
-        self.Element_vBox.Add(self.Element_Subject,0,wx.LEFT|wx.BOTTOM,4)
-        self.Body.SetSizer(self.Element_vBox)
+        self.vBox_Main.Add(self.Element_SwapSign,0,wx.ALIGN_RIGHT|wx.RIGHT|wx.TOP,4)
+        self.vBox_Main.AddStretchSpacer(1)
+        self.vBox_Main.Add(self.Element_Subject,0,wx.LEFT|wx.BOTTOM,4)
+        self.Body.SetSizer(self.vBox_Main)
         self.Body.Layout()
         self.Body.Update()
 
@@ -703,9 +734,11 @@ class Sticker:
         if(isinstance(self.Text_Data,list)):
             self.SetData(self.Text_Data[0])
             self.Data_Idx = 0
+            self.Element_SwapSign.Show()
             self.EnableSwap(True)
         else:
             self.SetData(Data)
+            self.Element_SwapSign.Hide()
             self.EnableSwap(False)
 
         if(Subject):
@@ -758,6 +791,7 @@ class Sticker:
             if(isinstance(self.Text_Data,list)):
                 self.Element_Data.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
                 self.Element_Subject.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
+                self.Body.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
                 return(True)
         else:
             self.Element_Data.Unbind(wx.EVT_LEFT_UP)
