@@ -96,74 +96,6 @@ class ConstDefs(Enum):
     STATUSBAR_STATUS_SUCC = 0x0515
 
 
-########## 暂时不用的代码 ########
-'''
-class uiElements:
-    CONTAINER = True
-    Collection = None
-
-    class wxObj:
-        UUID = None
-        Parent = None
-        Body = None
-        CONTAINER = False
-
-        def __init__(self,Element:wx.Window|None=None):
-            self.UUID = uuid.uuid4()
-            if(Element):
-                self.SetElement(Element)
-
-        def SetElement(self,Element:wx.Window):
-            self.Body = Element
-
-        def SetParent(self,Element:uiElements.wxObjs):
-            self.Parent = Element
-
-
-    # 用于承载元素的聚合, 如一个Line或者Bundle中的所有元素
-    class wxObjs:
-        UUID = None
-        Parent = None
-        Children = []
-        CONTAINER = True
-
-        def __init__(self):
-            self.UUID = uuid.uuid4()
-
-        def AppendElement(self,Element:wx.Window|uiElements.wxObjs|uiElements.wxObj):
-            if(type(Element) == wx.Window):
-                Temp = uiElements.wxObj(Element)
-            else:
-                Temp = Element
-            Temp.SetParent(self)
-            self.Children.append(Temp)
-            return Temp.UUID
-        
-        def SetParent(self,Element:uiElements.wxObjs):
-            self.Parent = Element
-
-    def __init__(self):
-        self.Collection = self.wxObjs()
-
-    # 遍历子对象
-    def Fetch(self):
-        print("Wait for write")
-
-    # 通过UUID查找对象
-    def FindObjByUUID():
-        print("Wait for write")
-
-    # 通过类型查找对象
-    def FindObjByType() -> list:
-        print("Wait for write")
-
-    def FindLabelByText() -> list:
-        print("Wait for write")
-'''
-
-#############################################
-#############################################
-#############################################
 def SelfCapture(Parent:wx.Window,ImageFormat:int=wx.BITMAP_TYPE_PNG,Filename:str|None=None):
     if(Filename):
         ImageFile = Filename
@@ -215,7 +147,8 @@ class ListView:
     #        self.Value = CellValue
 
     class Col:
-        Top: wx.Window
+        __Top: wx.Window
+        __Parent: wx.dataview.DataViewListCtrl
         UUID: uuid.UUID
         Index: int
         Name: str
@@ -223,7 +156,8 @@ class ListView:
         Width: int|None
 
         def __init__(self,Parent:wx.dataview.DataViewListCtrl,ColIndex:int,ColName:str,ColType:int,ColWidth:int|None=None):
-            self.Top = Parent.GetTopLevelParent()
+            self.__Top = Parent.GetTopLevelParent()
+            self.__Parent = Parent
             self.UUID = uuid.uuid4()
             self.Index = ColIndex
             self.Name = ColName
@@ -235,38 +169,38 @@ class ListView:
 
             match ColType:
                 case ConstDefs.LISTVIEW_COL_TYPE_TEXT:
-                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewTextRenderer(),ColIndex,self.Top.FromDIP(self.Width)))
+                    self.__Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewTextRenderer(),ColIndex,self.__Top.FromDIP(self.Width)))
                 case ConstDefs.LISTVIEW_COL_TYPE_TOGGLE:
-                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewToggleRenderer(mode=wx.dataview.DATAVIEW_CELL_ACTIVATABLE),ColIndex,self.Top.FromDIP(self.Width)))
+                    self.__Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewToggleRenderer(mode=wx.dataview.DATAVIEW_CELL_ACTIVATABLE),ColIndex,self.__Top.FromDIP(self.Width)))
                 case ConstDefs.LISTVIEW_COL_TYPE_PROGRESS:
-                    Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewProgressRenderer(),ColIndex,self.Top.FromDIP(self.Width)))
+                    self.__Parent.AppendColumn(wx.dataview.DataViewColumn(self.Name,wx.dataview.DataViewProgressRenderer(),ColIndex,self.__Top.FromDIP(self.Width)))
 
     class Row:
-        Parent: wx.dataview.DataViewListCtrl
+        __Parent: wx.dataview.DataViewListCtrl
         UUID: uuid.UUID
         Index: int
         Name: str|None
         Cells: list
 
         def __init__(self,Parent:wx.dataview.DataViewListCtrl,RowIndex:int,RowValues:list,RowName:str|None=None):
-            self.Parent = Parent
+            self.__Parent = Parent
             self.UUID = uuid.uuid4()
             self.Name = RowName
             self.Cells = RowValues
             # 判断 RowIndex 的合法性
-            if((RowIndex >=0) and (RowIndex <= self.Parent.GetItemCount())):
+            if((RowIndex >=0) and (RowIndex <= self.__Parent.GetItemCount())):
                 self.Index = RowIndex
             else:
-                self.Index = self.Parent.GetItemCount()
+                self.Index = self.__Parent.GetItemCount()
 
         def Append(self):
-            self.Index = self.Parent.GetItemCount()
-            self.Parent.AppendItem(self.Cells)
+            self.Index = self.__Parent.GetItemCount()
+            self.__Parent.AppendItem(self.Cells)
 
         def SetCell(self,ColIndex:int,Value) -> bool:
             if(ColIndex >= 0 and ColIndex < len(self.Cells)):
                 self.Cells[ColIndex] = Value
-                self.Parent.SetValue(Value,self.Index,ColIndex)
+                self.__Parent.SetValue(Value,self.Index,ColIndex)
                 return True
             return False
 
@@ -276,8 +210,8 @@ class ListView:
                     return True
             return False
 
-    Top: wx.Window
-    Parent: wx.Window
+    __Top: wx.Window
+    __Parent: wx.Window
     Cols: list[Col]
     Rows: list[Row]
     # this: last appended of modified row and col index [rowIndex,colIndex]
@@ -285,9 +219,9 @@ class ListView:
     Body: wx.dataview.DataViewListCtrl
 
     def __init__(self,Parent:wx.Window,Position:wx.Point=wx.DefaultPosition,Size:wx.Size=wx.DefaultSize):
-        self.Top = Parent.GetTopLevelParent()
-        self.Parent = Parent
-        self.Body = wx.dataview.DataViewListCtrl(Parent,size=self.Top.FromDIP(Size),style=wx.dataview.DV_ROW_LINES)
+        self.__Top = Parent.GetTopLevelParent()
+        self.__Parent = Parent
+        self.Body = wx.dataview.DataViewListCtrl(self.__Parent,size=self.__Top.FromDIP(Size),style=wx.dataview.DV_ROW_LINES)
         self.Cols = []
         self.Rows = []
         self.this = [0,0]
@@ -396,7 +330,7 @@ class ListView:
 class LogView:
 
     class Row:
-        Parent: wx.ListCtrl
+        __Parent: wx.ListCtrl
         UUID: uuid.UUID
         Index: int
         Urgency: int
@@ -407,7 +341,7 @@ class LogView:
         Continued: bool
 
         def __init__(self,Parent:wx.ListCtrl,RowIndex:int,Urgency:int,Source:str|None,Message:str,DateTimeFormat:str,MessageOnly:bool=False):
-            self.Parent = Parent
+            self.__Parent = Parent
             self.UUID = uuid.uuid4()
             self.Index = RowIndex
             self.Urgency = Urgency
@@ -433,17 +367,17 @@ class LogView:
 
             if(MessageOnly):
                 self.Continued = True
-                self.Parent.Append(['','','',self.Message])
+                self.__Parent.Append(['','','',self.Message])
             else:
                 self.Continued = False
-                self.Parent.Append([self.Type,self.DateTime.strftime(DateTimeFormat),self.Source,self.Message])
+                self.__Parent.Append([self.Type,self.DateTime.strftime(DateTimeFormat),self.Source,self.Message])
 
         def Color(self,Colors:dict):
-            self.Parent.SetItemTextColour(self.Index,wx.Colour(Colors['FG']))
-            self.Parent.SetItemBackgroundColour(self.Index,wx.Colour(Colors['BG']))
+            self.__Parent.SetItemTextColour(self.Index,wx.Colour(Colors['FG']))
+            self.__Parent.SetItemBackgroundColour(self.Index,wx.Colour(Colors['BG']))
 
-    Top: wx.Window
-    Parent: wx.Window
+    __Top: wx.Window
+    __Parent: wx.Window
     DateTimeFormat: str
     Rows: list[Row]
     this: int
@@ -451,14 +385,14 @@ class LogView:
     Colors: dict
 
     def __init__(self,Parent:wx.Window,Position:wx.Point=wx.DefaultPosition,Size:wx.Size=wx.DefaultSize):
-        self.Top = Parent.GetTopLevelParent()
-        self.Parent = Parent
-        self.Body = wx.ListCtrl(Parent,wx.ID_ANY,size=self.Top.FromDIP(Size),style=wx.LC_REPORT)
+        self.__Top = Parent.GetTopLevelParent()
+        self.__Parent = Parent
+        self.Body = wx.ListCtrl(self.__Parent,wx.ID_ANY,size=self.__Top.FromDIP(Size),style=wx.LC_REPORT)
         self.DateTimeFormat = DATETIMEFORMAT
-        self.Body.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,width=self.Top.FromDIP(50))
-        self.Body.InsertColumn(1,"Time",width=self.Top.FromDIP(140))
-        self.Body.InsertColumn(2,"Source",width=self.Top.FromDIP(70))
-        self.Body.InsertColumn(3,"Message",width=self.Top.FromDIP(500))
+        self.Body.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,width=self.__Top.FromDIP(50))
+        self.Body.InsertColumn(1,"Time",width=self.__Top.FromDIP(140))
+        self.Body.InsertColumn(2,"Source",width=self.__Top.FromDIP(70))
+        self.Body.InsertColumn(3,"Message",width=self.__Top.FromDIP(500))
         self.Rows = []
         self.Colors = {
             ConstDefs.LOGVIEW_URGENCY_INFO: {
@@ -529,18 +463,18 @@ class LogView:
 
     def SetColumnsWidth(self,Width:dict={'Urgency':50,'DateTime':140,'Source':70,'Message':500}):
         if 'Urgency' in Width:
-            self.Body.SetColumnWidth(0,self.Top.FromDIP(Width['Urgency']))
+            self.Body.SetColumnWidth(0,self.__Top.FromDIP(Width['Urgency']))
         if 'DateTime' in Width:
-            self.Body.SetColumnWidth(1,self.Top.FromDIP(Width['DateTime']))
+            self.Body.SetColumnWidth(1,self.__Top.FromDIP(Width['DateTime']))
         if 'Source' in Width:
-            self.Body.SetColumnWidth(2,self.Top.FromDIP(Width['Source']))
+            self.Body.SetColumnWidth(2,self.__Top.FromDIP(Width['Source']))
         if 'Message' in Width:
-            self.Body.SetColumnWidth(3,self.Top.FromDIP(Width['Message']))
+            self.Body.SetColumnWidth(3,self.__Top.FromDIP(Width['Message']))
 
 class StatusBar:
-    Top: wx.Window
-    Window: wx.Window
-    Parent: wx.Window
+    __Top: wx.Window
+    __Window: wx.Window
+    __Parent: wx.Window
     Body: wx.Panel
     Position: wx.Point
     Size: wx.Size
@@ -553,14 +487,14 @@ class StatusBar:
     LeftPadding: int
 
     def __init__(self,Window:wx.Window,Parent:wx.Window,Height:int|None=None):
-        self.Top = Parent.GetTopLevelParent()
-        self.Window = Window
-        self.Parent = Parent
+        self.__Top = Parent.GetTopLevelParent()
+        self.__Window = Window
+        self.__Parent = Parent
         if(Height):
-            self.Size = wx.Size(self.Window.GetClientSize().Width,self.Top.FromDIP(Height))
+            self.Size = wx.Size(self.__Window.GetClientSize().Width,self.__Top.FromDIP(Height))
         else:
-            self.Size = wx.Size(self.Window.GetClientSize().Width,self.Top.FromDIP(24))
-        self.Position = wx.Point(0,self.Window.GetClientSize().Height - self.Size.Height)
+            self.Size = wx.Size(self.__Window.GetClientSize().Width,self.__Top.FromDIP(24))
+        self.Position = wx.Point(0,self.__Window.GetClientSize().Height - self.Size.Height)
         self.Colors = {
             ConstDefs.STATUSBAR_STATUS_RADY: {
                 'BG': COLOR['STATUS_BAR']['RADY']['BG'],
@@ -593,14 +527,14 @@ class StatusBar:
         self.Status = ConstDefs.STATUSBAR_STATUS_RADY
         self.LeftPadding = 10
         self.Font = wx.Font(12,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,faceName="SimHei")
-        self.Body = wx.Panel(self.Parent,wx.ID_ANY,self.Position,self.Top.FromDIP(self.Size))
+        self.Body = wx.Panel(self.__Parent,wx.ID_ANY,self.Position,self.__Top.FromDIP(self.Size))
         self.Sizer_Main = wx.BoxSizer(wx.HORIZONTAL)
         self.Element_Text = wx.StaticText(self.Body,wx.ID_ANY,self.Texts[self.Status])
         self.Element_Text.SetFont(self.Font)
         self.Body.SetBackgroundColour(self.Colors[self.Status]['BG'])
         self.Element_Text.SetForegroundColour(self.Colors[self.Status]['FG'])
-        self.Sizer_Main.AddSpacer(self.Top.FromDIP(self.LeftPadding))
-        self.Sizer_Main.Add(self.Element_Text,1,wx.ALIGN_CENTER,self.Top.FromDIP(4))
+        self.Sizer_Main.AddSpacer(self.__Top.FromDIP(self.LeftPadding))
+        self.Sizer_Main.Add(self.Element_Text,1,wx.ALIGN_CENTER,self.__Top.FromDIP(4))
         self.Body.SetSizer(self.Sizer_Main)
         self.Body.Layout()
 
@@ -608,7 +542,7 @@ class StatusBar:
     def Update(self):
         self.Element_Text.SetLabel(self.Texts[self.Status])
         self.Element_Text.SetFont(self.Font)
-        self.Body.SetSize(self.Top.FromDIP(self.Size))
+        self.Body.SetSize(self.__Top.FromDIP(self.Size))
         self.Body.SetBackgroundColour(self.Colors[self.Status]['BG'])
         self.Element_Text.SetForegroundColour(self.Colors[self.Status]['FG'])
 
@@ -681,7 +615,8 @@ class Debug:
 
 
 class Sticker:
-    Top: wx.Window
+    __Top: wx.Window
+    __Parent: wx.Window
     Body: wx.Panel
     Element_vBox: wx.BoxSizer
     Element_Data: wx.StaticText
@@ -703,8 +638,9 @@ class Sticker:
         else:
             self.Text_Subject = " "
 
-        self.Top = Parent.GetTopLevelParent()
-        self.Body = wx.Panel(Parent,wx.ID_ANY,Position,self.Top.FromDIP(Size))
+        self.__Top = Parent.GetTopLevelParent()
+        self.__Parent = Parent
+        self.Body = wx.Panel(self.__Parent,wx.ID_ANY,Position,self.__Top.FromDIP(Size))
         self.Body.SetBackgroundColour(wx.Colour(BGColor))
         
         self.Font_Data = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
@@ -783,7 +719,7 @@ class Sticker:
         self.Body.SetPosition(Pos)
 
     def Scale(self,Size:wx.Size) -> None:
-        self.Body.SetSize(self.Top.FromDIP(Size))
+        self.Body.SetSize(self.__Top.FromDIP(Size))
 
     def GetSize(self) -> wx.Size:
         return self.Body.GetSize()
@@ -830,8 +766,8 @@ class Sticker:
 
 
 class AboutDialog:
-    Top: wx.Window
-    Parent: wx.Window
+    __Top: wx.Window
+    __Parent: wx.Window
     Element_AboutDialog: wx.Dialog
     Element_MainPanel: wx.Panel
     Container_MainvBox: wx.BoxSizer
@@ -857,9 +793,9 @@ class AboutDialog:
     
     def __init__(self,Parent:wx.Window,Title:str,LogoPath:str|None,LogoScale:float|None,ProductName:str,ProductSubtitle:str,ProductVersion:str,ProductCopyright:str,ProductDetail:str,Size:wx.Size):
         UsedHeight = 0
-        self.Top = Parent.GetTopLevelParent()
-        self.Parent = Parent
-        self.Element_AboutDialog = wx.Dialog(Parent,wx.ID_ANY,Title,size=self.Top.FromDIP(Size))
+        self.__Top = Parent.GetTopLevelParent()
+        self.__Parent = Parent
+        self.Element_AboutDialog = wx.Dialog(self.__Parent,wx.ID_ANY,Title,size=self.__Top.FromDIP(Size))
         self.Element_MainPanel = wx.Panel(self.Element_AboutDialog,wx.ID_ANY)
         self.Container_MainvBox = wx.BoxSizer(wx.VERTICAL)
         self.Container_NamehBox = wx.BoxSizer(wx.HORIZONTAL)
@@ -941,8 +877,8 @@ class AboutDialog:
         self.Container_DetailTextvBox.Add(self.Element_ProductDetail,1,wx.EXPAND|wx.ALL,1)
         # 如果不使用BoxSizer来布局TextCtrl，会导致Panel尺寸改变后TextCtrl无法增加尺寸
         self.Element_ProductDetailContainer.SetSizer(self.Container_DetailTextvBox)
-        self.Element_ProductDetailContainer.SetMinSize(self.Top.FromDIP((int(Size[0]-64),Size[1] - UsedHeight - 50 + self.DETAIL_HEIGHT_OFFSET)))
-        self.Element_ProductDetail.SetMinSize(self.Top.FromDIP((int(Size[0]-64),Size[1] - UsedHeight - 52 + self.DETAIL_HEIGHT_OFFSET)))
+        self.Element_ProductDetailContainer.SetMinSize(self.__Top.FromDIP((int(Size[0]-64),Size[1] - UsedHeight - 50 + self.DETAIL_HEIGHT_OFFSET)))
+        self.Element_ProductDetail.SetMinSize(self.__Top.FromDIP((int(Size[0]-64),Size[1] - UsedHeight - 52 + self.DETAIL_HEIGHT_OFFSET)))
 
         self.Container_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
         self.Container_SubtitlehBox.Add(self.Element_ProductSubtitle,1)
