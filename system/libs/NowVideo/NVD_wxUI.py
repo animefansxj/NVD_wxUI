@@ -75,17 +75,11 @@ COLOR = {
 
 SVG = {
     'REFRESH': '''
-        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
-            <defs>
-                <mask id="cut-mask">
-                <rect x="0" y="0" width="128" height="128" fill="#FFFFFF" />
-                <rect x="-64" y="40" width="256" height="48" fill="#000000" transform="rotate(-45 64 64)" />
-                </mask>
-            </defs>
-
-            <circle cx="64" cy="64" r="52" fill="none" stroke="{COLOR}" stroke-width="16" mask="url(#cut-mask)" />
-            <polygon points="30,102 58,102 46,127" fill="{COLOR}" stroke="none" stroke-width="1" />
-            <polygon points="98,26 70,26 82,1" fill="{COLOR}" stroke="none" stroke-width="1" />
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid" width="140" height="140">
+          <path d="M122.734,57.380 C124.848,80.005 113.968,102.856 93.000,114.962 C72.032,127.067 46.803,125.064 28.266,111.921 " stroke="{COLOR}" stroke-width="16px" fill="none" fill-rule="evenodd" />
+          <path d="M5.266,70.620 C3.152,47.995 14.032,25.144 35.000,13.038 C55.968,0.933 81.197,2.936 99.734,16.079 "  stroke="{COLOR}" stroke-width="16px" fill="none" fill-rule="evenodd" />
+          <path d="M56.994,101.792 L24.783,134.003 L12.993,90.002 L56.994,101.792 Z" fill="{COLOR}" fill-rule="evenodd" />
+          <path d="M71.006,26.208 L103.217,-6.003 L115.007,37.998 L71.006,26.208 Z" fill="{COLOR}" fill-rule="evenodd" />
         </svg>
     ''',
     'POINT': '''
@@ -642,7 +636,7 @@ class Sticker:
     __BGColor: wx.Colour
     Body: wx.Panel
     vBox_Main: wx.BoxSizer
-    Element_SwapSign: wx.StaticBitmap
+    Element_SwapIndicator: wx.StaticBitmap
     Element_Data: wx.StaticText
     Element_Subject: wx.StaticText
     Text_Data: str|list[str]
@@ -650,6 +644,7 @@ class Sticker:
     Data_Idx: int|None
     Font_Data: wx.Font
     Font_Subject: wx.Font
+    __INDICATOR_SIZE = 6
 
 #生成仪表盘中的单个含背景色的贴条
     def __init__(self,Parent:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,FontColor:wx.Colour,Data:str|list[str]|None=None,Subject:str|list[str]|None=None,FontName:str="Tahoma",MainFontSize:int=16,HitsFontSize:int=10):
@@ -669,13 +664,13 @@ class Sticker:
         self.Body.SetBackgroundColour(wx.Colour(BGColor))
         self.vBox_Main = wx.BoxSizer(wx.VERTICAL)
 
-        #self.Element_SwapSign = wx.StaticBitmap(self.Body,wx.ID_ANY,wx.Image(cairosvg.svg2png(SVG['REFRESH'].encode("utf-8"),output_width=self.__Top.FromDIP(16),output_height=self.__Top.FromDIP(16))))
-        self.Element_SwapSign = wx.StaticBitmap(
+        #self.Element_SwapIndicator = wx.StaticBitmap(self.Body,wx.ID_ANY,wx.Image(cairosvg.svg2png(SVG['REFRESH'].encode("utf-8"),output_width=self.__Top.FromDIP(16),output_height=self.__Top.FromDIP(16))))
+        self.Element_SwapIndicator = wx.StaticBitmap(
             self.Body,
             wx.ID_ANY,
             wx.BitmapBundle.FromSVG(
                 SVG['POINT'].replace("{COLOR}",f"#{((int(f"0x{self.__BGColor.GetAsString(wx.C2S_HTML_SYNTAX)[1:]}",16))^0xFFFFFF):06X}").encode("utf-8"),
-                self.__Top.FromDIP((6,6))
+                self.__Top.FromDIP((self.__INDICATOR_SIZE,self.__INDICATOR_SIZE))
             )
         )
         self.Font_Data = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
@@ -688,7 +683,7 @@ class Sticker:
             case _:
                 self.Element_Data = wx.StaticText(self.Body,label=self.Text_Data)
                 self.Data_Idx = None
-                self.Element_SwapSign.Hide()
+                self.Element_SwapIndicator.Hide()
         self.Element_Data.SetFont(self.Font_Data)
         self.Element_Data.SetForegroundColour(FontColor)
         self.Element_Data.Center()
@@ -701,7 +696,7 @@ class Sticker:
             self.EnableSwap(True)
         self.Element_Subject.SetFont(self.Font_Subject)
         self.Element_Subject.SetForegroundColour(FontColor)
-        self.vBox_Main.Add(self.Element_SwapSign,0,wx.ALIGN_RIGHT|wx.RIGHT|wx.TOP,8)
+        self.vBox_Main.Add(self.Element_SwapIndicator,0,wx.ALIGN_RIGHT|wx.RIGHT|wx.TOP,8)
         self.vBox_Main.AddStretchSpacer(1)
         self.vBox_Main.Add(self.Element_Subject,0,wx.LEFT|wx.BOTTOM,4)
         self.Body.SetSizer(self.vBox_Main)
@@ -739,11 +734,11 @@ class Sticker:
         if(isinstance(self.Text_Data,list)):
             self.SetData(self.Text_Data[0])
             self.Data_Idx = 0
-            self.Element_SwapSign.Show()
+            self.Element_SwapIndicator.Show()
             self.EnableSwap(True)
         else:
             self.SetData(Data)
-            self.Element_SwapSign.Hide()
+            self.Element_SwapIndicator.Hide()
             self.EnableSwap(False)
 
         if(Subject):
