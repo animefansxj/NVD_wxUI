@@ -670,7 +670,7 @@ class Sticker:
             wx.ID_ANY,
             wx.BitmapBundle.FromSVG(
                 SVG['POINT'].replace("{COLOR}",f"#{((int(f"0x{self.__BGColor.GetAsString(wx.C2S_HTML_SYNTAX)[1:]}",16))^0xFFFFFF):06X}").encode("utf-8"),
-                self.__Top.FromDIP((self.__INDICATOR_SIZE,self.__INDICATOR_SIZE))
+                (self.__INDICATOR_SIZE,self.__INDICATOR_SIZE)
             )
         )
         self.Font_Data = wx.Font(MainFontSize,wx.FONTFAMILY_MODERN,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL,False,FontName,wx.FONTENCODING_DEFAULT)
