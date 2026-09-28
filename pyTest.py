@@ -240,7 +240,7 @@ def WinMain():
     STK2_2 = ui.Sticker(MainWindow_RightPanel,(0,0),(120,60),wx.Colour(96,96,192),wx.Colour("#FFF"),["Data 3","Data 4","Data 5"],["Subject 3","Subject 4"],"SimHei",16,10)
     STK1_1.ClickCopyAll(wx.EVT_RIGHT_UP,lambda:DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Sticker","Data Copied"))
     STK2_1.ClickCopyData(wx.EVT_RIGHT_UP,lambda:DebugPanel_DebugView.Log(ui.ConstDefs.LOGVIEW_URGENCY_INFO,"Sticker","Data Copied"))
-    STK2_2.ClickCopyData(wx.EVT_RIGHT_UP)
+    STK2_2.ClickCopyAll(wx.EVT_RIGHT_UP)
 
     Stickers = []
     Stickers.append(hBoxLine(STK1_1.Body,Border=5))

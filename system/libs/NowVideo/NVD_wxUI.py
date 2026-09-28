@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260925A                  #
+#                Rev 20260928A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -647,15 +647,33 @@ class Sticker:
     __INDICATOR_SIZE = 6
 
 #生成仪表盘中的单个含背景色的贴条
-    def __init__(self,Parent:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,FontColor:wx.Colour,Data:str|list[str]|None=None,Subject:str|list[str]|None=None,FontName:str="Tahoma",MainFontSize:int=16,HitsFontSize:int=10):
+    def __init__(self,Parent:wx.Window,Position:wx.Point,Size:wx.Size,BGColor:wx.Colour,FontColor:wx.Colour,Data:str|list[str],Subject:str|list[str]|None=None,FontName:str="Tahoma",MainFontSize:int=16,HitsFontSize:int=10):
         if(Data):
-            self.Text_Data = Data
+            if(isinstance(Data,list)):
+                match(len(Data)):
+                    case 0:
+                        self.Text_Data = ""
+                    case 1:
+                        self.Text_Data = Data[0]
+                    case _:
+                        self.Text_Data = Data
+            else:
+                self.Text_Data = Data
         else:
-            self.Text_Data = " "
+            self.Text_Data = ""
         if(Subject):
-            self.Text_Subject = Subject
+            if(isinstance(Subject,list)):
+                match(len(Subject)):
+                    case 0:
+                        self.Text_Subject = ""
+                    case 1:
+                        self.Text_Subject = Subject[0]
+                    case _:
+                        self.Text_Subject = Subject
+            else:
+                self.Text_Subject = Subject
         else:
-            self.Text_Subject = " "
+            self.Text_Subject = ""
 
         self.__Top = Parent.GetTopLevelParent()
         self.__Parent = Parent
@@ -713,21 +731,36 @@ class Sticker:
     def SetData(self,Text:str) -> None:
         self.Element_Data.SetLabel(Text)
 
-    def GetData(self) -> str:
-        return self.Element_Data.GetLabel()
-
     def SetSubject(self,Text:str|None=None) -> None:
         if(Text):
             self.Element_Subject.SetLabel(Text)
         else:
-            self.Element_Subject.SetLabel(" ")
+            self.Element_Subject.SetLabel("")
+
+    def GetData(self) -> str:
+        return self.Text_Data
+
+    def GetCurrentData(self) -> str:
+        match(self.Text_Data):
+            case list():
+                if(self.Data_Idx >= 0 and self.Data_Idx < len(self.Text_Data)):
+                    return self.Text_Data[self.Data_Idx]
+                else:
+                    return ""
+            case _:
+                return self.Text_Data
 
     def GetSubject(self) -> str:
-        Text = self.Element_Subject.GetLabel()
-        if(Text == " "):
-            return None
+        return self.Text_Subject
+
+    def GetCurrentSubject(self) -> str:
+        if(isinstance(self.Text_Data,list) and isinstance(self.Text_Subject,list)):
+            if(self.Data_Idx >= 0 and self.Data_Idx < len(self.Text_Subject)):
+                return self.Text_Subject[self.Data_Idx]
+            else:
+                return ""
         else:
-            return self.Element_Subject.GetLabel()
+            return self.Text_Subject
 
     def SetText(self,Data:str|list,Subject:str|list|None=None):
         self.Text_Data = Data
@@ -761,16 +794,19 @@ class Sticker:
         self.Body.Bind(Event,Handler)
         self.Element_Data.Bind(Event,Handler)
         self.Element_Subject.Bind(Event,Handler)
+        self.Element_SwapIndicator.Bind(Event,Handler)
 
     def ClickCopyAll(self,Event:wx.PyEventBinder,Handler:function=lambda:None):
-        self.Body.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Subject + ": " + self.Text_Data),Handler()))
-        self.Element_Data.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Subject + ": " + self.Text_Data),Handler()))
-        self.Element_Subject.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Subject + ": " + self.Text_Data),Handler()))
+        self.Body.Bind(Event,lambda Event:(pyperclip.copy(self.GetCurrentSubject() + ": " + self.GetCurrentData()),Handler()))
+        self.Element_Data.Bind(Event,lambda Event:(pyperclip.copy(self.GetCurrentSubject() + ": " + self.GetCurrentData()),Handler()))
+        self.Element_Subject.Bind(Event,lambda Event:(pyperclip.copy(self.GetCurrentSubject() + ": " + self.GetCurrentData()),Handler()))
+        self.Element_SwapIndicator.Bind(Event,lambda Event:(pyperclip.copy(self.GetCurrentSubject() + ": " + self.GetCurrentData()),Handler()))
 
     def ClickCopyData(self,Event:wx.PyEventBinder,Handler:function=lambda:None):
-        self.Body.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Data),Handler()))
-        self.Element_Data.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Data),Handler()))
-        self.Element_Subject.Bind(Event,lambda Event:(pyperclip.copy(self.Text_Data),Handler()))
+        self.Body.Bind(Event,lambda Event:(pyperclip.copy(self.GetCurrentData()),Handler()))
+        self.Element_Data.Bind(Event,lambda Event:(pyperclip.copy(self.GetCurrentData()),Handler()))
+        self.Element_Subject.Bind(Event,lambda Event:(pyperclip.copy(self.GetCurrentData()),Handler()))
+        self.Element_SwapIndicator.Bind(Event,lambda Event:(pyperclip.copy(self.GetCurrentData()),Handler()))
 
     def Swap(self):
         if(isinstance(self.Text_Data,list)):
@@ -789,13 +825,16 @@ class Sticker:
     def EnableSwap(self,Enable:bool) -> bool:
         if(Enable):
             if(isinstance(self.Text_Data,list)):
+                self.Body.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
                 self.Element_Data.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
                 self.Element_Subject.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
-                self.Body.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
+                self.Element_SwapIndicator.Bind(wx.EVT_LEFT_UP,lambda Event:self.Swap())
                 return(True)
         else:
+            self.Body.Unbind(wx.EVT_LEFT_UP)
             self.Element_Data.Unbind(wx.EVT_LEFT_UP)
             self.Element_Subject.Unbind(wx.EVT_LEFT_UP)
+            self.Element_SwapIndicator.Unbind(wx.EVT_LEFT_UP)
             return(False)
 
 
