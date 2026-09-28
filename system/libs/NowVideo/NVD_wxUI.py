@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260928A                  #
+#                Rev 20260928B                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -795,6 +795,12 @@ class Sticker:
         self.Element_Data.Bind(Event,Handler)
         self.Element_Subject.Bind(Event,Handler)
         self.Element_SwapIndicator.Bind(Event,Handler)
+
+    def Unbind(self,Event:wx.PyEventBinder):
+        self.Body.Unbind(Event)
+        self.Element_Data.Unbind(Event)
+        self.Element_Subject.Unbind(Event)
+        self.Element_SwapIndicator.Unbind(Event)
 
     def ClickCopyAll(self,Event:wx.PyEventBinder,Handler:function=lambda:None):
         self.Body.Bind(Event,lambda Event:(pyperclip.copy(self.GetCurrentSubject() + ": " + self.GetCurrentData()),Handler()))
