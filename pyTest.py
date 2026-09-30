@@ -224,6 +224,8 @@ def WinMain():
     MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickAbout(MainWindow),HelpMenu_About)
     MainWindow.Bind(wx.EVT_MENU,lambda Event:OnClickWxDebug(),HelpMenu_wxDebug)
 
+    MainWindow.SetAcceleratorTable(wx.AcceleratorTable([(wx.ACCEL_NORMAL,wx.WXK_F12,9051)]))
+
     TableView = ui.ListView(MainWindow_LeftPanel,Size=PANEL['LEFT']['SIZE'])
     TableView.SetCols("Enabled:toggle:60|Name:text:160|Progress:progress:80|Status:text")
     TableView.AppendRow([True,"Name 1",60,"Status 1"],"Row1")
