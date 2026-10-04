@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20260928B                  #
+#                Rev 20261004A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -847,16 +847,19 @@ class Sticker:
 class AboutDialog:
     __Top: wx.Window
     __Parent: wx.Window
+    __DPIScale: float
+    __LogoImage: wx.Image
+    __LogoBitmap: wx.Bitmap
     Element_AboutDialog: wx.Dialog
     Element_MainPanel: wx.Panel
-    Container_MainvBox: wx.BoxSizer
-    Container_NamehBox: wx.BoxSizer
-    Container_SubtitlehBox: wx.BoxSizer
-    Container_VersionhBox: wx.BoxSizer
-    Container_CopyrighthBox: wx.BoxSizer
-    Container_DetailhBox: wx.BoxSizer
-    Container_DetailTextvBox: wx.BoxSizer
-    Container_ButtonhBox: wx.BoxSizer
+    Sizer_MainvBox: wx.BoxSizer
+    Sizer_NamehBox: wx.BoxSizer
+    Sizer_SubtitlehBox: wx.BoxSizer
+    Sizer_VersionhBox: wx.BoxSizer
+    Sizer_CopyrighthBox: wx.BoxSizer
+    Sizer_DetailhBox: wx.BoxSizer
+    Sizer_DetailTextvBox: wx.BoxSizer
+    Sizer_ButtonhBox: wx.BoxSizer
     Element_ProductName: wx.StaticText
     Element_ProductSubtitle: wx.StaticText
     Element_ProductVersion: wx.StaticText
@@ -874,27 +877,28 @@ class AboutDialog:
         UsedHeight = 0
         self.__Top = Parent.GetTopLevelParent()
         self.__Parent = Parent
+        self.__DPIScale = self.__Top.GetDPIScaleFactor()
         self.Element_AboutDialog = wx.Dialog(self.__Parent,wx.ID_ANY,Title,size=self.__Top.FromDIP(Size))
         self.Element_MainPanel = wx.Panel(self.Element_AboutDialog,wx.ID_ANY)
-        self.Container_MainvBox = wx.BoxSizer(wx.VERTICAL)
-        self.Container_NamehBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.Container_SubtitlehBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.Container_VersionhBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.Container_CopyrighthBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.Container_DetailhBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.Container_DetailTextvBox = wx.BoxSizer(wx.VERTICAL)
-        self.Container_ButtonhBox = wx.BoxSizer(wx.HORIZONTAL)
-        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING * 2)
-        self.Container_MainvBox.Add(self.Container_NamehBox,2,wx.ALIGN_CENTER)
-        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING * 2)
-        self.Container_MainvBox.Add(self.Container_SubtitlehBox,1,wx.ALIGN_CENTER)
-        self.Container_MainvBox.Add(self.Container_VersionhBox,1,wx.ALIGN_CENTER)
-        self.Container_MainvBox.Add(self.Container_CopyrighthBox,1,wx.ALIGN_CENTER)
-        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING)
-        self.Container_MainvBox.Add(self.Container_DetailhBox,4,wx.ALIGN_CENTER)
-        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING)
-        self.Container_MainvBox.Add(self.Container_ButtonhBox,1,wx.ALIGN_CENTER)
-        self.Container_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING * 2)
+        self.Sizer_MainvBox = wx.BoxSizer(wx.VERTICAL)
+        self.Sizer_NamehBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Sizer_SubtitlehBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Sizer_VersionhBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Sizer_CopyrighthBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Sizer_DetailhBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Sizer_DetailTextvBox = wx.BoxSizer(wx.VERTICAL)
+        self.Sizer_ButtonhBox = wx.BoxSizer(wx.HORIZONTAL)
+        self.Sizer_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING * 2)
+        self.Sizer_MainvBox.Add(self.Sizer_NamehBox,2,wx.ALIGN_CENTER)
+        self.Sizer_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING * 2)
+        self.Sizer_MainvBox.Add(self.Sizer_SubtitlehBox,1,wx.ALIGN_CENTER)
+        self.Sizer_MainvBox.Add(self.Sizer_VersionhBox,1,wx.ALIGN_CENTER)
+        self.Sizer_MainvBox.Add(self.Sizer_CopyrighthBox,1,wx.ALIGN_CENTER)
+        self.Sizer_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING)
+        self.Sizer_MainvBox.Add(self.Sizer_DetailhBox,4,wx.ALIGN_CENTER)
+        self.Sizer_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING)
+        self.Sizer_MainvBox.Add(self.Sizer_ButtonhBox,1,wx.ALIGN_CENTER)
+        self.Sizer_MainvBox.AddStretchSpacer(self.BOX_SIZER_MARGIN_STEPPING * 2)
 
         self.Element_ProductName = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductName)
         self.Element_ProductSubtitle = wx.StaticText(self.Element_MainPanel,wx.ID_ANY,ProductSubtitle)
@@ -921,29 +925,40 @@ class AboutDialog:
         # 如果调用时指定了要显示Logo
         if(LogoPath):
             try:
-                ScaleRatio = 1
-                self.LogoImage = wx.Image()
-                self.LogoImage.LoadFile(LogoPath,wx.BITMAP_TYPE_PNG)
+                self.__LogoImage = wx.Image()
+                self.__LogoImage.LoadFile(LogoPath,wx.BITMAP_TYPE_PNG)
                 # 判断图像加载是否成功
-                if(self.LogoImage.IsOk()):
+                if(self.__LogoImage.IsOk()):
                     # 若调用时定义了预缩放比例，则先执行一次缩放
                     if(LogoScale):
-                        self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*LogoScale),int(self.LogoImage.Height*LogoScale),wx.IMAGE_QUALITY_HIGH)
+                        self.__LogoImage = self.__LogoImage.Scale(int(self.__LogoImage.Width*LogoScale),int(self.__LogoImage.Height*LogoScale),wx.IMAGE_QUALITY_HIGH)
                     # 判断Logo的高度或宽度是否超出了限制大小
-                    if(((self.LogoImage.Width / self.LOGO_MAX_WIDTH) > 1) or ((self.LogoImage.Height / self.LOGO_MAX_HEIGHT) > 1)):
+                    if(((self.__LogoImage.Width / self.LOGO_MAX_WIDTH) > 1) or ((self.__LogoImage.Height / self.LOGO_MAX_HEIGHT) > 1)):
                         # 判断宽度和高度超出限制的比例，若宽度超出更多则通过宽度计算缩放比例，若高度超过更多则通过高度计算错放比例
-                        if((self.LogoImage.GetSize().GetWidth() / self.LOGO_MAX_WIDTH) > (self.LogoImage.GetSize().GetHeight() / self.LOGO_MAX_HEIGHT)):
-                            ScaleRatio = self.LOGO_MAX_WIDTH / self.LogoImage.Width
+                        if((self.__LogoImage.Width / self.LOGO_MAX_WIDTH) > (self.__LogoImage.Height / self.LOGO_MAX_HEIGHT)):
+                            ScaleRatio = self.LOGO_MAX_WIDTH / self.__LogoImage.Width * self.__DPIScale
                         else:
-                            ScaleRatio = self.LOGO_MAX_HEIGHT / self.LogoImage.Height
-                    self.LogoImage = self.LogoImage.Scale(int(self.LogoImage.Width*ScaleRatio),int(self.LogoImage.Height*ScaleRatio),wx.IMAGE_QUALITY_HIGH)
-                    self.Logo = wx.StaticBitmap(self.Element_MainPanel,wx.ID_ANY,self.LogoImage)
-                    self.Container_NamehBox.Add(self.Logo,3,wx.ALIGN_CENTER)
-                    # 将Logo高度与产品名称控件的高度做比较，取最大值 (UsedHeight=LogoImage.Height>UsedHeight?LogoImage.Height:UsedHeight)
-                    if(self.LogoImage.Height > UsedHeight):
-                        UsedHeight = self.LogoImage.Height
+                            ScaleRatio = self.LOGO_MAX_HEIGHT / self.__LogoImage.Height * self.__DPIScale
+                        self.__LogoImage = self.__LogoImage.Scale(int(self.__LogoImage.Width*ScaleRatio),int(self.__LogoImage.Height*ScaleRatio),wx.IMAGE_QUALITY_HIGH)
+                    self.__LogoBitmap = wx.Bitmap(self.__LogoImage)
+                    self.__LogoBitmap.SetScaleFactor(self.__DPIScale)
+                    self.LogoBitmapBundle = wx.BitmapBundle.FromImage(self.__LogoImage)
+                    self.Logo = wx.StaticBitmap(self.Element_MainPanel,wx.ID_ANY,self.__LogoBitmap)
+                    self.Sizer_NamehBox.AddSpacer(50)
+                    self.Sizer_NamehBox.Add(self.Logo,3,wx.ALIGN_CENTER)
+                    self.Sizer_NamehBox.AddStretchSpacer()
+                    self.Sizer_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
+                    self.Sizer_NamehBox.AddSpacer(50)
+                    # 将Logo高度与产品名称控件的高度做比较，取最大值 (UsedHeight=__LogoImage.Height>UsedHeight?__LogoImage.Height:UsedHeight)
+                    if(self.__LogoImage.Height > UsedHeight):
+                        UsedHeight = self.__LogoImage.Height / self.__DPIScale
+                else:
+                    self.Sizer_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
             except BaseException as e:
                 print("Error: [AboutDialog][LoadImage]: " + str(e))
+        else:
+            self.Sizer_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
+
 
         # 计算TextCtrl以外控件的高度总和，若直接从BoxSizer取会得到错误的高度
         UsedHeight = UsedHeight + \
@@ -953,23 +968,22 @@ class AboutDialog:
             self.Element_ButtonOK.GetSize().GetHeight()
 
         # 使用带底色的Panel作为TextCtrl的底色，保留四边1个像素来绘制TextCtrl的边框
-        self.Container_DetailTextvBox.Add(self.Element_ProductDetail,1,wx.EXPAND|wx.ALL,1)
+        self.Sizer_DetailTextvBox.Add(self.Element_ProductDetail,1,wx.EXPAND|wx.ALL,1)
         # 如果不使用BoxSizer来布局TextCtrl，会导致Panel尺寸改变后TextCtrl无法增加尺寸
-        self.Element_ProductDetailContainer.SetSizer(self.Container_DetailTextvBox)
+        self.Element_ProductDetailContainer.SetSizer(self.Sizer_DetailTextvBox)
         self.Element_ProductDetailContainer.SetMinSize(self.__Top.FromDIP((int(Size[0]-64),Size[1] - UsedHeight - 50 + self.DETAIL_HEIGHT_OFFSET)))
         self.Element_ProductDetail.SetMinSize(self.__Top.FromDIP((int(Size[0]-64),Size[1] - UsedHeight - 52 + self.DETAIL_HEIGHT_OFFSET)))
 
-        self.Container_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
-        self.Container_SubtitlehBox.Add(self.Element_ProductSubtitle,1)
-        self.Container_VersionhBox.Add(self.Element_ProductVersion,1)
-        self.Container_CopyrighthBox.Add(self.Element_ProductCopyright,1)
-        self.Container_DetailhBox.Add(self.Element_ProductDetailContainer,1)
-        self.Container_ButtonhBox.Add(self.Element_ButtonOK,1)
+        self.Sizer_SubtitlehBox.Add(self.Element_ProductSubtitle,1)
+        self.Sizer_VersionhBox.Add(self.Element_ProductVersion,1)
+        self.Sizer_CopyrighthBox.Add(self.Element_ProductCopyright,1)
+        self.Sizer_DetailhBox.Add(self.Element_ProductDetailContainer,1)
+        self.Sizer_ButtonhBox.Add(self.Element_ButtonOK,1)
             
         self.Element_ButtonOK.Bind(wx.EVT_BUTTON,self.OnClose)
 
         self.Element_AboutDialog.Center()
-        self.Element_MainPanel.SetSizer(self.Container_MainvBox)
+        self.Element_MainPanel.SetSizer(self.Sizer_MainvBox)
         self.Element_MainPanel.Layout()
         self.Element_MainPanel.Update()
 
