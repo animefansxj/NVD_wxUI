@@ -979,8 +979,11 @@ class AboutDialog:
         self.Sizer_CopyrighthBox.Add(self.Element_ProductCopyright,1)
         self.Sizer_DetailhBox.Add(self.Element_ProductDetailContainer,1)
         self.Sizer_ButtonhBox.Add(self.Element_ButtonOK,1)
-            
+
+        self.Element_AboutDialog.Bind(wx.EVT_MENU,lambda Event:Debug.wxDebug(),id=9051)
         self.Element_ButtonOK.Bind(wx.EVT_BUTTON,self.OnClose)
+
+        self.Element_AboutDialog.SetAcceleratorTable(wx.AcceleratorTable([(wx.ACCEL_NORMAL,wx.WXK_F12,9051)]))
 
         self.Element_AboutDialog.Center()
         self.Element_MainPanel.SetSizer(self.Sizer_MainvBox)
