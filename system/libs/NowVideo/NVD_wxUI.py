@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20261004A                  #
+#                Rev 20261008A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -933,12 +933,12 @@ class AboutDialog:
                     if(LogoScale):
                         self.__LogoImage = self.__LogoImage.Scale(int(self.__LogoImage.Width*LogoScale),int(self.__LogoImage.Height*LogoScale),wx.IMAGE_QUALITY_HIGH)
                     # 判断Logo的高度或宽度是否超出了限制大小
-                    if(((self.__LogoImage.Width / self.LOGO_MAX_WIDTH) > 1) or ((self.__LogoImage.Height / self.LOGO_MAX_HEIGHT) > 1)):
+                    if(((self.__LogoImage.Width / (self.LOGO_MAX_WIDTH*self.__DPIScale)) > 1) or ((self.__LogoImage.Height / (self.LOGO_MAX_HEIGHT*self.__DPIScale)) > 1)):
                         # 判断宽度和高度超出限制的比例，若宽度超出更多则通过宽度计算缩放比例，若高度超过更多则通过高度计算错放比例
-                        if((self.__LogoImage.Width / self.LOGO_MAX_WIDTH) > (self.__LogoImage.Height / self.LOGO_MAX_HEIGHT)):
-                            ScaleRatio = self.LOGO_MAX_WIDTH / self.__LogoImage.Width * self.__DPIScale
+                        if((self.__LogoImage.Width / (self.LOGO_MAX_WIDTH*self.__DPIScale)) > (self.__LogoImage.Height / (self.LOGO_MAX_HEIGHT*self.__DPIScale))):
+                            ScaleRatio = self.LOGO_MAX_WIDTH * self.__DPIScale / self.__LogoImage.Width
                         else:
-                            ScaleRatio = self.LOGO_MAX_HEIGHT / self.__LogoImage.Height * self.__DPIScale
+                            ScaleRatio = self.LOGO_MAX_HEIGHT * self.__DPIScale / self.__LogoImage.Height
                         self.__LogoImage = self.__LogoImage.Scale(int(self.__LogoImage.Width*ScaleRatio),int(self.__LogoImage.Height*ScaleRatio),wx.IMAGE_QUALITY_HIGH)
                     self.__LogoBitmap = wx.Bitmap(self.__LogoImage)
                     self.__LogoBitmap.SetScaleFactor(self.__DPIScale)
