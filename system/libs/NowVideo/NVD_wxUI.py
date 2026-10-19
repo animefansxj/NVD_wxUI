@@ -714,7 +714,7 @@ class Sticker:
         self.Element_Data.SetFont(self.Font_Data)
         self.Element_Data.SetForegroundColour(FontColor)
         if(self.Subject_MaxLines > 1):
-            self.Element_Data.SetPosition(wx.Point(-1,4))
+            self.Element_Data.SetPosition(wx.Point(-1,self.__INDICATOR_SIZE+4))
             self.Element_Data.Center(wx.HORIZONTAL)
         else:
             self.Element_Data.Center(wx.BOTH)
