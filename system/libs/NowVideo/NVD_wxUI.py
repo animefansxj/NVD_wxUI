@@ -641,6 +641,7 @@ class Sticker:
     Element_Subject: wx.StaticText
     Text_Data: str|list[str]
     Text_Subject: str|list[str]
+    Subject_MaxLines: int
     Data_Idx: int|None
     Font_Data: wx.Font
     Font_Subject: wx.Font
@@ -681,6 +682,14 @@ class Sticker:
         self.Body = wx.Panel(self.__Parent,wx.ID_ANY,Position,self.__Top.FromDIP(Size))
         self.Body.SetBackgroundColour(wx.Colour(BGColor))
         self.vBox_Main = wx.BoxSizer(wx.VERTICAL)
+        self.Subject_MaxLines = 0
+        match(self.Text_Subject):
+            case str():
+                self.Subject_MaxLines = len(self.Text_Subject.splitlines())
+            case list():
+                for line in self.Text_Subject:
+                    if(len(line.splitlines()) > self.Subject_MaxLines):
+                        self.Subject_MaxLines = len(line.splitlines())
 
         #self.Element_SwapIndicator = wx.StaticBitmap(self.Body,wx.ID_ANY,wx.Image(cairosvg.svg2png(SVG['REFRESH'].encode("utf-8"),output_width=self.__Top.FromDIP(16),output_height=self.__Top.FromDIP(16))))
         self.Element_SwapIndicator = wx.StaticBitmap(
@@ -704,7 +713,11 @@ class Sticker:
                 self.Element_SwapIndicator.Hide()
         self.Element_Data.SetFont(self.Font_Data)
         self.Element_Data.SetForegroundColour(FontColor)
-        self.Element_Data.Center()
+        if(self.Subject_MaxLines > 1):
+            self.Element_Data.SetPosition(wx.Point(-1,4))
+            self.Element_Data.Center(wx.HORIZONTAL)
+        else:
+            self.Element_Data.Center(wx.BOTH)
         match(self.Text_Subject):
             case list():
                 self.Element_Subject = wx.StaticText(self.Body,label=self.Text_Subject[0])
