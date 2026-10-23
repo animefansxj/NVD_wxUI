@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20261008A                  #
+#                Rev 20261023A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -558,9 +558,13 @@ class StatusBar:
     def Update(self):
         self.Element_Text.SetLabel(self.Texts[self.Status])
         self.Element_Text.SetFont(self.Font)
+        self.Element_Text.SetForegroundColour(self.Colors[self.Status]['FG'])
         self.Body.SetSize(self.__Top.FromDIP(self.Size))
         self.Body.SetBackgroundColour(self.Colors[self.Status]['BG'])
-        self.Element_Text.SetForegroundColour(self.Colors[self.Status]['FG'])
+        self.Element_Text.Refresh()
+        self.Element_Text.Update()
+        self.Body.Refresh()
+        self.Body.Update()
 
     # 变更状态
     def SetStatus(self,Status:int):
