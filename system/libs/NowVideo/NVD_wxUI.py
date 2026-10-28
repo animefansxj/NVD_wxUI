@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20261023A                  #
+#                Rev 20261028A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -150,7 +150,7 @@ def SelfCapture(Parent:wx.Window,ImageFormat:int=wx.BITMAP_TYPE_PNG,Filename:str
         Image.ConvertToImage().SaveFile(ImageFile,Format)
         return ImageFile
     except:
-        print(f"[X] {sys._getframe().f_code.co_name}: Unable to save file: {ImageFile}")
+        print(f"[X] | {sys._getframe().f_code.co_name}: Unable to save file: {ImageFile}")
         return None
 
 class ListView:
@@ -260,7 +260,7 @@ class ListView:
                     ColType = ConstDefs.LISTVIEW_COL_TYPE_PROGRESS
                 case _:
                     ColType = None
-                    print("[X] List::AppendCol: \"" + Header + "\" ColType Err,Skiped.")
+                    print("[X] | List::AppendCol: \"" + Header + "\" ColType Err,Skiped.")
 
             # 如果存在第三个列参数
             if(ParamCount > 2):
@@ -271,7 +271,7 @@ class ListView:
             if(ColType):
                 self.Cols.append(self.Col(self.Body,len(self.Cols),ColName,ColType,ColWidth))
         else:
-            print("[X] List::AppendCol: \"" + Header + "\" Params not enough,Skiped.")
+            print("[X] | List::AppendCol: \"" + Header + "\" Params not enough,Skiped.")
 
     def SetCols(self,Headers:str):
         # Exsample: "ColName:Type:Width|ColName:Type:Width|ColName:Type:Width"
@@ -972,7 +972,7 @@ class AboutDialog:
                 else:
                     self.Sizer_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
             except BaseException as e:
-                print("Error: [AboutDialog][LoadImage]: " + str(e))
+                print("[X] | Error: [AboutDialog][LoadImage]: " + str(e))
         else:
             self.Sizer_NamehBox.Add(self.Element_ProductName,2,wx.ALIGN_CENTER)
 
