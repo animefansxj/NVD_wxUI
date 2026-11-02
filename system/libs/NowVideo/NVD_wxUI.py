@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20261029A                  #
+#                Rev 20261102A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -486,6 +486,23 @@ class LogView:
             self.Body.SetColumnWidth(2,self.__Top.FromDIP(Width['Source']))
         if 'Message' in Width:
             self.Body.SetColumnWidth(3,self.__Top.FromDIP(Width['Message']))
+
+    def FetchAll(self,Textualization:bool=False) -> list[dict]|None:
+        if(len(self.Rows) > 0):
+            _Result = []
+            for _Row in self.Rows:
+                _Result.append(
+                    {
+                        'Urgency': _Row.Type if Textualization else _Row.Urgency,
+                        'Time': _Row.DateTime.strftime(self.DateTimeFormat) if Textualization else _Row.DateTime,
+                        'Source': _Row.Source,
+                        'Message': _Row.Message
+                    }
+                )
+            return _Result
+        else:
+            return None
+
 
 class StatusBar:
     __Top: wx.Window
