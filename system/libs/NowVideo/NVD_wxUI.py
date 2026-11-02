@@ -496,7 +496,8 @@ class LogView:
                         'Urgency': _Row.Type if Textualization else _Row.Urgency,
                         'Time': _Row.DateTime.strftime(self.DateTimeFormat) if Textualization else _Row.DateTime,
                         'Source': _Row.Source,
-                        'Message': _Row.Message
+                        'Message': _Row.Message,
+                        'Continued': _Row.Continued
                     }
                 )
             return _Result
