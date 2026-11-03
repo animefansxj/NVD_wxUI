@@ -392,7 +392,7 @@ class LogView:
                 self.__Parent.Append([self.Type,self.DateTime.strftime(DateTimeFormat),self.Source,self.Message])
 
             if(Scroll):
-                self.__Parent.EnsureVisible(self.__Parent.GetItemCount()-1)
+                self.__Parent.EnsureVisible(self.Index)
 
         def Color(self,Colors:dict):
             self.__Parent.SetItemTextColour(self.Index,wx.Colour(Colors['FG']))
