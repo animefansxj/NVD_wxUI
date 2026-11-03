@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20261102B                  #
+#                Rev 20261103A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -105,6 +105,9 @@ class ConstDefs(Enum):
     LOGVIEW_URGENCY_ERRO = 0x0413
     LOGVIEW_URGENCY_SUCC = 0x0414
     LOGVIEW_URGENCY_DEBG = 0x0415
+    LOGVIEW_SCROLL_NONE = 0x421
+    LOGVIEW_SCROLL_FORCE = 0x422
+    LOGVIEW_SCROLL_AUTO = 0x423
     STATUSBAR_STATUS_RADY = 0x0511
     STATUSBAR_STATUS_RUNG = 0x0512
     STATUSBAR_STATUS_WARN = 0x0513
@@ -356,7 +359,7 @@ class LogView:
         Message: str
         Continued: bool
 
-        def __init__(self,Parent:wx.ListCtrl,RowIndex:int,Urgency:int,Source:str|None,Message:str,DateTimeFormat:str,MessageOnly:bool=False):
+        def __init__(self,Parent:wx.ListCtrl,RowIndex:int,Urgency:int,Source:str|None,Message:str,DateTimeFormat:str,Scroll:bool=True,MessageOnly:bool=False):
             self.__Parent = Parent
             self.UUID = uuid.uuid4()
             self.Index = RowIndex
@@ -388,6 +391,9 @@ class LogView:
                 self.Continued = False
                 self.__Parent.Append([self.Type,self.DateTime.strftime(DateTimeFormat),self.Source,self.Message])
 
+            if(Scroll):
+                self.__Parent.EnsureVisible(self.__Parent.GetItemCount()-1)
+
         def Color(self,Colors:dict):
             self.__Parent.SetItemTextColour(self.Index,wx.Colour(Colors['FG']))
             self.__Parent.SetItemBackgroundColour(self.Index,wx.Colour(Colors['BG']))
@@ -399,12 +405,16 @@ class LogView:
     this: int
     Body: wx.ListCtrl
     Colors: dict
+    ScrollMode: int
+    __Scroll: bool
 
     def __init__(self,Parent:wx.Window,Position:wx.Point=wx.DefaultPosition,Size:wx.Size=wx.DefaultSize):
         self.__Top = Parent.GetTopLevelParent()
         self.__Parent = Parent
         self.Body = wx.ListCtrl(self.__Parent,wx.ID_ANY,size=self.__Top.FromDIP(Size),style=wx.LC_REPORT)
         self.DateTimeFormat = DATETIMEFORMAT
+        self.ScrollMode = ConstDefs.LOGVIEW_SCROLL_NONE
+        self.Scroll = False
         self.Body.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,width=self.__Top.FromDIP(50))
         self.Body.InsertColumn(1,"Time",width=self.__Top.FromDIP(140))
         self.Body.InsertColumn(2,"Source",width=self.__Top.FromDIP(70))
@@ -436,7 +446,7 @@ class LogView:
 
     # 追加带有优先级,日期,来源的日志信息
     def Log(self,Urgency:int,Source:str,Message:str,Color:bool=True):
-        self.Rows.append(self.Row(self.Body,len(self.Rows),Urgency,Source,Message,self.DateTimeFormat))
+        self.Rows.append(self.Row(self.Body,len(self.Rows),Urgency,Source,Message,self.DateTimeFormat,self.__Scroll,False))
         self.this = len(self.Rows)-1
         if(Color):
             if Urgency in ConstDefs:
@@ -444,7 +454,7 @@ class LogView:
 
     # 在上一条日志下方追加相同色彩,无优先级,日期和来源的日志信息
     def Append(self,Message:str,Color:bool=True):
-        self.Rows.append(self.Row(self.Body,len(self.Rows),self.Rows[self.this].Urgency,None,Message,self.DateTimeFormat,True))
+        self.Rows.append(self.Row(self.Body,len(self.Rows),self.Rows[self.this].Urgency,None,Message,self.DateTimeFormat,self.__Scroll,True))
         self.this = len(self.Rows)-1
         if(Color):
             self.Rows[self.this].Color(self.Colors[self.Rows[self.this].Urgency])
@@ -486,6 +496,14 @@ class LogView:
             self.Body.SetColumnWidth(2,self.__Top.FromDIP(Width['Source']))
         if 'Message' in Width:
             self.Body.SetColumnWidth(3,self.__Top.FromDIP(Width['Message']))
+
+    def SetScroll(self,ScrollMode:int):
+        self.ScrollMode = ScrollMode
+        if(ScrollMode != ConstDefs.LOGVIEW_SCROLL_NONE):
+            self.Body.EnsureVisible(self.Body.GetItemCount()-1)
+            self.__Scroll = True
+        else:
+            self.__Scroll = False
 
     def FetchAll(self,Textualization:bool=False) -> list[dict]|None:
         if(len(self.Rows) > 0):
