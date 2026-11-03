@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20261103A                  #
+#                Rev 20261103B                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -414,7 +414,7 @@ class LogView:
         self.Body = wx.ListCtrl(self.__Parent,wx.ID_ANY,size=self.__Top.FromDIP(Size),style=wx.LC_REPORT)
         self.DateTimeFormat = DATETIMEFORMAT
         self.ScrollMode = ConstDefs.LOGVIEW_SCROLL_NONE
-        self.Scroll = False
+        self.__Scroll = False
         self.Body.InsertColumn(0,"Lv",wx.LIST_FORMAT_CENTER,width=self.__Top.FromDIP(50))
         self.Body.InsertColumn(1,"Time",width=self.__Top.FromDIP(140))
         self.Body.InsertColumn(2,"Source",width=self.__Top.FromDIP(70))
@@ -497,13 +497,30 @@ class LogView:
         if 'Message' in Width:
             self.Body.SetColumnWidth(3,self.__Top.FromDIP(Width['Message']))
 
-    def SetScroll(self,ScrollMode:int):
-        self.ScrollMode = ScrollMode
-        if(ScrollMode != ConstDefs.LOGVIEW_SCROLL_NONE):
-            self.Body.EnsureVisible(self.Body.GetItemCount()-1)
+    def JugementScroll(self,Event):
+        if(self.Body.IsVisible(self.Body.GetItemCount(-1))):
             self.__Scroll = True
         else:
             self.__Scroll = False
+
+    def SetScroll(self,ScrollMode:int):
+        match(ScrollMode):
+            case ConstDefs.LOGVIEW_SCROLL_AUTO:
+                self.ScrollMode = ScrollMode
+                self.__Scroll = True
+                self.Body.EnsureVisible(self.Body.GetItemCount()-1)
+                self.Body.Bind(wx.EVT_SCROLL,self.JugementScroll)
+            case ConstDefs.LOGVIEW_SCROLL_FORCE:
+                self.ScrollMode = ScrollMode
+                self.__Scroll = True
+                self.Body.EnsureVisible(self.Body.GetItemCount()-1)
+                self.Body.Unbind(wx.EVT_SCROLL)
+            case ConstDefs.LOGVIEW_SCROLL_NONE:
+                self.__Scroll = False
+                self.ScrollMode = ScrollMode
+                self.Body.Unbind(wx.EVT_SCROLL)
+            case _:
+                print(f"[X] | {sys._getframe().f_code.co_name}: Wrong parameter provided.")
 
     def FetchAll(self,Textualization:bool=False) -> list[dict]|None:
         if(len(self.Rows) > 0):
