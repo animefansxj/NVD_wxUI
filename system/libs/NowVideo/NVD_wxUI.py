@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20261103B                  #
+#                Rev 20261103C                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -521,6 +521,11 @@ class LogView:
                 self.Body.Unbind(wx.EVT_SCROLL)
             case _:
                 print(f"[X] | {sys._getframe().f_code.co_name}: Wrong parameter provided.")
+
+    def Clear(self):
+        self.this = 0
+        self.Rows = []
+        self.Body.ClearAll()
 
     def FetchAll(self,Textualization:bool=False) -> list[dict]|None:
         if(len(self.Rows) > 0):
