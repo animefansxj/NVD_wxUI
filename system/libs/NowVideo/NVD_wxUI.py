@@ -1,7 +1,7 @@
 #################################################
 #   NowVideo AppUI Builder Class & Functions    #
 #            by af_xj@hotmail.com               #
-#                Rev 20261103C                  #
+#                Rev 20261104A                  #
 #            (C) 25' 26' NowVideo               #
 #             Default License: GPL              #
 #  -------------------------------------------  #
@@ -498,10 +498,11 @@ class LogView:
             self.Body.SetColumnWidth(3,self.__Top.FromDIP(Width['Message']))
 
     def JugementScroll(self,Event):
-        if(self.Body.IsVisible(self.Body.GetItemCount(-1))):
+        if(self.Body.IsVisible(self.Body.GetItemCount()-1)):
             self.__Scroll = True
         else:
             self.__Scroll = False
+        Event.Skip()
 
     def SetScroll(self,ScrollMode:int):
         match(ScrollMode):
@@ -509,23 +510,26 @@ class LogView:
                 self.ScrollMode = ScrollMode
                 self.__Scroll = True
                 self.Body.EnsureVisible(self.Body.GetItemCount()-1)
-                self.Body.Bind(wx.EVT_SCROLL,self.JugementScroll)
+                self.Body.Bind(wx.EVT_SCROLLWIN,self.JugementScroll)
+                self.Body.Bind(wx.EVT_MOUSEWHEEL,self.JugementScroll)
             case ConstDefs.LOGVIEW_SCROLL_FORCE:
                 self.ScrollMode = ScrollMode
                 self.__Scroll = True
                 self.Body.EnsureVisible(self.Body.GetItemCount()-1)
-                self.Body.Unbind(wx.EVT_SCROLL)
+                self.Body.Unbind(wx.EVT_SCROLLWIN)
+                self.Body.Unbind(wx.EVT_MOUSEWHEEL)
             case ConstDefs.LOGVIEW_SCROLL_NONE:
                 self.__Scroll = False
                 self.ScrollMode = ScrollMode
-                self.Body.Unbind(wx.EVT_SCROLL)
+                self.Body.Unbind(wx.EVT_SCROLLWIN)
+                self.Body.Unbind(wx.EVT_MOUSEWHEEL)
             case _:
                 print(f"[X] | {sys._getframe().f_code.co_name}: Wrong parameter provided.")
 
     def Clear(self):
         self.this = 0
         self.Rows = []
-        self.Body.ClearAll()
+        self.Body.DeleteAllItems()
 
     def FetchAll(self,Textualization:bool=False) -> list[dict]|None:
         if(len(self.Rows) > 0):
